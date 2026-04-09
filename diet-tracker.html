@@ -485,7 +485,7 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
             oninput="renderGoalPlan()"/>
         </div>
         <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:80px;">
-          <label style="font-size:11px;color:var(--text2);">每周减重（kg）</label>
+          <label style="font-size:11px;color:var(--text2);">每周目标（kg）</label>
           <select id="goal-pace"
             style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;font-size:14px;color:var(--text);font-family:var(--font-sans);outline:none;width:100%;"
             onchange="renderGoalPlan()">
@@ -495,6 +495,7 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
             <option value="1">激进 1.0/周</option>
           </select>
         </div>
+        <button onclick="saveGoal()" style="padding:9px 16px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-sans);white-space:nowrap;align-self:flex-end;">保存目标</button>
       </div>
       <div id="goal-plan" style="margin-top:12px;"></div>
     </div>
@@ -699,7 +700,7 @@ function sw(id,el){
   el.classList.add('active');
   if(id==='stats') renderStats();
   if(id==='recipe') syncRecipe();
-  if(id==='body') renderBody();
+  if(id==='body'){ renderBody(); loadGoal(); }
 }
 
 // ── DIARY ──────────────────────────────────────────
@@ -1506,6 +1507,38 @@ function getBodyWeight(){
   if(!weightLog.length) return 65;
   const sorted=[...weightLog].sort((a,b)=>a.date.localeCompare(b.date));
   return sorted[sorted.length-1].val;
+}
+
+async function saveGoal(){
+  const goalW=parseFloat(document.getElementById('goal-weight').value);
+  const pace=document.getElementById('goal-pace').value;
+  if(!goalW) return;
+  const entry={goalWeight:goalW, pace:parseFloat(pace), updatedAt:Date.now()};
+  if(window.db){
+    try{
+      const {doc,setDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      await setDoc(doc(window.db,'settings','goal'),entry);
+      // show brief confirmation
+      const btn=event.target;
+      btn.textContent='已保存 ✓'; btn.style.background='#3B6D11';
+      setTimeout(()=>{btn.textContent='保存目标';btn.style.background='';},1500);
+    }catch(e){console.error('saveGoal error',e);}
+  }
+  renderGoalPlan();
+}
+
+async function loadGoal(){
+  if(!window.db) return;
+  try{
+    const {doc,getDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    const snap=await getDoc(doc(window.db,'settings','goal'));
+    if(snap.exists()){
+      const {goalWeight,pace}=snap.data();
+      document.getElementById('goal-weight').value=goalWeight||'';
+      document.getElementById('goal-pace').value=pace||0.5;
+      renderGoalPlan();
+    }
+  }catch(e){console.error('loadGoal error',e);}
 }
 
 function renderGoalPlan(){
