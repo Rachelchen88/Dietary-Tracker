@@ -1058,6 +1058,84 @@ function calManualEditFree(){
   document.getElementById('cal-auto-tag-free').style.display='none';
 }
 
+// 本地中文食物营养数据库（每100g）
+const NUTRITION_DB={
+  // 主食
+  '米饭':{cal:116,pro:2.6,carb:25.6,fat:0.3},'白米饭':{cal:116,pro:2.6,carb:25.6,fat:0.3},
+  '面条':{cal:137,pro:4.8,carb:28.1,fat:0.7},'馒头':{cal:223,pro:7,carb:45,fat:1.1},
+  '面包':{cal:265,pro:8,carb:52,fat:3},'饺子':{cal:240,pro:9,carb:35,fat:7},
+  '包子':{cal:220,pro:8,carb:38,fat:4},'粥':{cal:46,pro:1.1,carb:9.8,fat:0.2},
+  '燕麦片':{cal:367,pro:13,carb:66,fat:7},'玉米':{cal:86,pro:3.2,carb:17,fat:1.2},
+  // 蔬菜
+  '番茄':{cal:20,pro:0.9,carb:3.5,fat:0.2},'西红柿':{cal:20,pro:0.9,carb:3.5,fat:0.2},
+  '菠菜':{cal:23,pro:2.9,carb:3.6,fat:0.3},'西兰花':{cal:34,pro:2.8,carb:4.9,fat:0.4},
+  '黄瓜':{cal:15,pro:0.8,carb:2.9,fat:0.1},'胡萝卜':{cal:41,pro:0.9,carb:9,fat:0.2},
+  '芹菜':{cal:16,pro:0.8,carb:3,fat:0.1},'生菜':{cal:13,pro:1.3,carb:2,fat:0.3},
+  '青椒':{cal:22,pro:1,carb:4.6,fat:0.2},'苦瓜':{cal:22,pro:1,carb:4,fat:0.1},
+  '茄子':{cal:25,pro:1.1,carb:5.5,fat:0.2},'洋葱':{cal:39,pro:1,carb:8,fat:0.2},
+  '大蒜':{cal:126,pro:4.5,carb:27,fat:0.2},'韭菜':{cal:26,pro:2.4,carb:4.2,fat:0.4},
+  '白萝卜':{cal:20,pro:0.9,carb:4,fat:0.1},'南瓜':{cal:22,pro:0.7,carb:4.5,fat:0.1},
+  '冬瓜':{cal:11,pro:0.4,carb:2.4,fat:0.2},'豆腐':{cal:81,pro:8.1,carb:1.9,fat:4.8},
+  '豌豆':{cal:81,pro:5.4,carb:14,fat:0.4},'毛豆':{cal:131,pro:13.1,carb:8.5,fat:5},
+  // 水果
+  '苹果':{cal:52,pro:0.3,carb:13,fat:0.2},'香蕉':{cal:89,pro:1.1,carb:22,fat:0.3},
+  '橙子':{cal:47,pro:0.9,carb:11,fat:0.1},'草莓':{cal:30,pro:0.6,carb:7,fat:0.3},
+  '西瓜':{cal:30,pro:0.6,carb:7.5,fat:0.1},'葡萄':{cal:69,pro:0.7,carb:18,fat:0.2},
+  '梨':{cal:50,pro:0.4,carb:12,fat:0.1},'桃子':{cal:39,pro:0.9,carb:9,fat:0.1},
+  '芒果':{cal:65,pro:0.5,carb:17,fat:0.3},'柠檬':{cal:29,pro:1.1,carb:9,fat:0.3},
+  // 肉类
+  '猪肉':{cal:259,pro:14.6,carb:0,fat:22},'鸡肉':{cal:167,pro:19,carb:0,fat:10},
+  '鸡胸肉':{cal:133,pro:24,carb:0,fat:3.5},'牛肉':{cal:250,pro:19,carb:0,fat:18},
+  '羊肉':{cal:247,pro:19,carb:0,fat:18},'鱼':{cal:100,pro:20,carb:0,fat:2},
+  '虾':{cal:93,pro:18,carb:1,fat:1.5},'虾仁':{cal:93,pro:18,carb:1,fat:1.5},
+  '鸡蛋':{cal:155,pro:12.6,carb:0.7,fat:10.6},'鸭蛋':{cal:185,pro:13,carb:1,fat:14},
+  // 乳制品
+  '牛奶':{cal:61,pro:3.2,carb:4.8,fat:3.3},'酸奶':{cal:61,pro:3.5,carb:4.7,fat:3.3},
+  '奶酪':{cal:350,pro:22,carb:1.3,fat:28},
+  // 豆类/坚果
+  '黄豆':{cal:416,pro:36,carb:30,fat:16},'红豆':{cal:330,pro:21,carb:60,fat:0.6},
+  '花生':{cal:567,pro:26,carb:16,fat:49},'核桃':{cal:654,pro:15,carb:14,fat:65},
+  '杏仁':{cal:579,pro:21,carb:22,fat:50},
+  // 菌菇
+  '香菇':{cal:34,pro:2.2,carb:5.2,fat:0.3},'黑木耳':{cal:35,pro:1.5,carb:7,fat:0.2},
+  '金针菇':{cal:37,pro:2.4,carb:7.4,fat:0.4},
+  // 零食/加工食品
+  '饼干':{cal:440,pro:6,carb:70,fat:15},'薯片':{cal:536,pro:7,carb:53,fat:34},
+  '巧克力':{cal:546,pro:5,carb:60,fat:31},'冰淇淋':{cal:207,pro:3.5,carb:24,fat:11},
+  '蛋糕':{cal:347,pro:5,carb:55,fat:12},'奥利奥':{cal:480,pro:5,carb:70,fat:21},
+  '薯条':{cal:312,pro:3.4,carb:41,fat:15},'汉堡':{cal:295,pro:17,carb:24,fat:14},
+  '披萨':{cal:266,pro:11,carb:33,fat:10},'炸鸡':{cal:299,pro:23,carb:11,fat:19},
+  // 饮品
+  '可乐':{cal:42,pro:0,carb:10.6,fat:0},'果汁':{cal:45,pro:0.5,carb:11,fat:0.1},
+  '豆浆':{cal:31,pro:3,carb:1.8,fat:1.6},'咖啡':{cal:2,pro:0.3,carb:0,fat:0},
+  // 泰国/外国食物
+  '泰国绿咖喱鱼':{cal:156,pro:12,carb:5,fat:10},'咖喱':{cal:180,pro:8,carb:15,fat:10},
+  '寿司':{cal:150,pro:5,carb:28,fat:2},'拉面':{cal:436,pro:15,carb:60,fat:15},
+  '炒饭':{cal:200,pro:5,carb:35,fat:5},'麻婆豆腐':{cal:120,pro:7,carb:5,fat:8},
+};
+
+async function fetchNutrition(foodName){
+  // 先查本地数据库
+  const key=Object.keys(NUTRITION_DB).find(k=>foodName.includes(k)||k.includes(foodName));
+  if(key) return NUTRITION_DB[key];
+  // 本地找不到，尝试 Open Food Facts
+  try{
+    const res=await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(foodName)}&search_simple=1&action=process&json=1&page_size=5&fields=product_name,nutriments`,{mode:'cors'});
+    const data=await res.json();
+    const products=(data.products||[]).filter(p=>p.nutriments&&p.nutriments['energy-kcal_100g']);
+    if(products.length){
+      const p=products[0];
+      return{
+        cal:Math.round(p.nutriments['energy-kcal_100g']||0),
+        pro:Math.round((p.nutriments['proteins_100g']||0)*10)/10,
+        carb:Math.round((p.nutriments['carbohydrates_100g']||0)*10)/10,
+        fat:Math.round((p.nutriments['fat_100g']||0)*10)/10,
+      };
+    }
+  }catch(e){}
+  throw new Error('未找到营养数据');
+}
+
 async function queryNutritionFree(){
   if(!mFoodName) return;
   const btn=document.getElementById('ai-nutrition-btn-free');
@@ -1065,22 +1143,8 @@ async function queryNutritionFree(){
   btn.textContent='查询中…'; btn.disabled=true;
   status.style.display=''; status.textContent=`正在查询「${mFoodName}」的营养数据…`;
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:200,
-        messages:[{role:'user',content:`请给出「${mFoodName}」每100克的营养数据，只返回如下JSON，不要任何其他文字：
-{"cal":数字,"pro":数字,"carb":数字,"fat":数字}
-cal=热量千卡，pro=蛋白质克，carb=碳水克，fat=脂肪克，全部为数字。`}]
-      })
-    });
-    const data=await resp.json();
-    const text=data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
-    const n=JSON.parse(text);
-    mFreeNutrPer100={cal:n.cal,pro:n.pro,carb:n.carb,fat:n.fat};
-    mFreeCalAuto=true;
+    const n=await fetchNutrition(mFoodName);
+    mFreeNutrPer100=n; mFreeCalAuto=true;
     const w=parseFloat(document.getElementById('df-weight').value)||100;
     const r=w/100;
     document.getElementById('df-cal').value=Math.round(n.cal*r);
@@ -1091,10 +1155,10 @@ cal=热量千卡，pro=蛋白质克，carb=碳水克，fat=脂肪克，全部为
     status.textContent=`每100g：热量${n.cal}千卡 · 蛋白${n.pro}g · 碳水${n.carb}g · 脂肪${n.fat}g`;
     status.style.color='var(--green-text)';
   }catch(e){
-    status.textContent='查询失败：'+e.message;
+    status.textContent='未找到数据，请手动填写';
     status.style.color='var(--red-text)';
   }finally{
-    btn.textContent='✦ AI 查营养'; btn.disabled=false;
+    btn.textContent='✦ 查营养'; btn.disabled=false;
   }
 }
 
@@ -1118,31 +1182,14 @@ function saveFoodFree(){
 }
 
 async function queryNutrition(){
-  console.log('queryNutrition called, mFoodName=', mFoodName);
   if(!mFoodName) return;
   const btn=document.getElementById('ai-nutrition-btn');
   const status=document.getElementById('ai-nutrition-status');
   btn.textContent='查询中…'; btn.disabled=true;
   status.style.display=''; status.textContent=`正在查询「${mFoodName}」的营养数据…`;
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:200,
-        messages:[{role:'user',content:`请给出「${mFoodName}」每100克的营养数据，只返回如下JSON，不要任何其他文字：
-{"cal":数字,"pro":数字,"carb":数字,"fat":数字}
-cal=热量千卡，pro=蛋白质克，carb=碳水克，fat=脂肪克，全部为数字。`}]
-      })
-    });
-    const data=await resp.json();
-    if(!data.content) throw new Error(data.error?.message||JSON.stringify(data));
-    const text=data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
-    const n=JSON.parse(text);
-    mNutritionPer100={cal:n.cal,pro:n.pro,carb:n.carb,fat:n.fat};
-    mCalAuto=true;
-    // 按当前份量填入
+    const n=await fetchNutrition(mFoodName);
+    mNutritionPer100=n; mCalAuto=true;
     const w=parseFloat(document.getElementById('d-weight').value)||100;
     const r=w/100;
     document.getElementById('d-cal').value=Math.round(n.cal*r);
@@ -1153,10 +1200,10 @@ cal=热量千卡，pro=蛋白质克，carb=碳水克，fat=脂肪克，全部为
     status.textContent=`每100g：热量${n.cal}千卡 · 蛋白${n.pro}g · 碳水${n.carb}g · 脂肪${n.fat}g`;
     status.style.color='var(--green-text)';
   }catch(e){
-    status.textContent='查询失败：'+e.message;
+    status.textContent='未找到数据，请手动填写';
     status.style.color='var(--red-text)';
   }finally{
-    btn.textContent='✦ AI 查营养'; btn.disabled=false;
+    btn.textContent='✦ 查营养'; btn.disabled=false;
   }
 }
 
@@ -1357,36 +1404,70 @@ async function generate(){
   </div>`).join('');
 
   const names=selNames();
-  const prompt=`你是一位擅长五色饮食搭配的营养厨师。用户选择了这些食材：${names.join('、')}。
 
-请推荐 3 道适合家庭烹饪的菜谱，每道菜要求：
-- 尽量用上所选食材
-- 标注涉及五色中的哪几色（红/黄/白/绿/黑，对应key: red/yellow/white/green/black）
-- 提供烹饪时间和难度（简单/中等/较难）
-- 列出完整食材和用量
-- 4-6个简洁步骤
+  // 本地中文菜谱库，按食材匹配
+  const RECIPES=[
+    {name:'番茄炒鸡蛋',colors:['red','yellow'],time:'15分钟',difficulty:'简单',cal:180,
+     ingredients:[{name:'番茄',amount:'2个'},{name:'鸡蛋',amount:'3个'},{name:'盐',amount:'少许'},{name:'糖',amount:'少许'},{name:'葱',amount:'适量'}],
+     steps:['番茄切块，鸡蛋打散备用','热锅加油，炒熟鸡蛋盛出','再加油爆香葱花，放入番茄翻炒','番茄出汁后加入鸡蛋','加盐、糖调味，翻炒均匀即可']},
+    {name:'清炒菠菜',colors:['green'],time:'10分钟',difficulty:'简单',cal:80,
+     ingredients:[{name:'菠菜',amount:'300g'},{name:'大蒜',amount:'3瓣'},{name:'盐',amount:'少许'},{name:'油',amount:'适量'}],
+     steps:['菠菜洗净切段，大蒜切片','热锅加油，爆香蒜片','放入菠菜大火翻炒','加盐调味，炒软即可出锅']},
+    {name:'蒜蓉西兰花',colors:['green','white'],time:'15分钟',difficulty:'简单',cal:90,
+     ingredients:[{name:'西兰花',amount:'1棵'},{name:'大蒜',amount:'5瓣'},{name:'盐',amount:'少许'},{name:'生抽',amount:'少许'}],
+     steps:['西兰花掰成小朵焯水2分钟','大蒜切末备用','热锅加油爆香蒜末','放入西兰花翻炒，加盐和生抽调味']},
+    {name:'红烧胡萝卜',colors:['red','yellow'],time:'20分钟',difficulty:'简单',cal:120,
+     ingredients:[{name:'胡萝卜',amount:'2根'},{name:'生抽',amount:'2勺'},{name:'糖',amount:'1勺'},{name:'葱姜',amount:'适量'}],
+     steps:['胡萝卜切滚刀块','热锅加油炒香葱姜','放入胡萝卜翻炒','加生抽、糖和少量水','小火焖10分钟至熟透']},
+    {name:'南瓜粥',colors:['yellow'],time:'30分钟',difficulty:'简单',cal:150,
+     ingredients:[{name:'南瓜',amount:'200g'},{name:'大米',amount:'100g'},{name:'水',amount:'适量'}],
+     steps:['南瓜去皮切块','大米洗净加水煮开','放入南瓜块','小火熬煮20分钟至软烂即可']},
+    {name:'凉拌黄瓜',colors:['green'],time:'10分钟',difficulty:'简单',cal:60,
+     ingredients:[{name:'黄瓜',amount:'2根'},{name:'大蒜',amount:'3瓣'},{name:'醋',amount:'2勺'},{name:'盐',amount:'少许'},{name:'香油',amount:'少许'}],
+     steps:['黄瓜拍碎切段','大蒜切末','加盐腌5分钟','加醋、蒜末、香油拌匀即可']},
+    {name:'香菇豆腐汤',colors:['black','white'],time:'20分钟',difficulty:'简单',cal:100,
+     ingredients:[{name:'香菇',amount:'5朵'},{name:'豆腐',amount:'1块'},{name:'葱',amount:'适量'},{name:'盐',amount:'少许'},{name:'生抽',amount:'少许'}],
+     steps:['香菇泡发切片，豆腐切块','锅中加水煮开','放入香菇煮5分钟','加入豆腐再煮5分钟','加盐和生抽调味，撒葱花']},
+    {name:'芹菜炒肉丝',colors:['green','white'],time:'20分钟',difficulty:'中等',cal:220,
+     ingredients:[{name:'芹菜',amount:'300g'},{name:'猪肉',amount:'150g'},{name:'生抽',amount:'2勺'},{name:'淀粉',amount:'少许'},{name:'盐',amount:'少许'}],
+     steps:['肉切丝用生抽、淀粉腌15分钟','芹菜切段','热锅加油炒肉丝至变色盛出','再炒芹菜至断生','放入肉丝一起翻炒，加盐调味']},
+    {name:'清炒苦瓜',colors:['green'],time:'15分钟',difficulty:'简单',cal:70,
+     ingredients:[{name:'苦瓜',amount:'1根'},{name:'大蒜',amount:'3瓣'},{name:'盐',amount:'少许'},{name:'油',amount:'适量'}],
+     steps:['苦瓜去瓤切片，用盐腌10分钟去苦味','挤去水分','热锅加油爆香蒜片','放入苦瓜大火快炒','加盐调味即可']},
+    {name:'黑木耳炒鸡蛋',colors:['black','yellow'],time:'15分钟',difficulty:'简单',cal:160,
+     ingredients:[{name:'黑木耳',amount:'50g'},{name:'鸡蛋',amount:'3个'},{name:'葱',amount:'适量'},{name:'盐',amount:'少许'}],
+     steps:['黑木耳泡发撕小朵，鸡蛋打散','热锅加油炒鸡蛋至凝固盛出','再炒黑木耳2分钟','加入鸡蛋一起翻炒','加盐调味出锅']},
+    {name:'番茄豆腐汤',colors:['red','white'],time:'20分钟',difficulty:'简单',cal:110,
+     ingredients:[{name:'番茄',amount:'2个'},{name:'豆腐',amount:'1块'},{name:'葱',amount:'适量'},{name:'盐',amount:'少许'}],
+     steps:['番茄切块，豆腐切块','锅中加油炒番茄出汁','加水煮开','放入豆腐煮5分钟','加盐调味，撒葱花']},
+    {name:'西兰花炒虾仁',colors:['green'],time:'20分钟',difficulty:'中等',cal:200,
+     ingredients:[{name:'西兰花',amount:'200g'},{name:'虾仁',amount:'150g'},{name:'大蒜',amount:'3瓣'},{name:'盐',amount:'少许'},{name:'生抽',amount:'少许'}],
+     steps:['西兰花焯水，虾仁用盐腌10分钟','热锅加油爆香蒜末','炒虾仁至变色','放入西兰花翻炒','加盐和生抽调味']},
+    {name:'蒜蓉茄子',colors:['black'],time:'25分钟',difficulty:'中等',cal:130,
+     ingredients:[{name:'茄子',amount:'2根'},{name:'大蒜',amount:'5瓣'},{name:'生抽',amount:'2勺'},{name:'糖',amount:'少许'}],
+     steps:['茄子切条蒸10分钟','大蒜切末','热锅加油炒香蒜末','加生抽、糖调成酱汁','浇在茄子上拌匀']},
+    {name:'毛豆炒虾仁',colors:['green'],time:'20分钟',difficulty:'中等',cal:210,
+     ingredients:[{name:'毛豆',amount:'200g'},{name:'虾仁',amount:'150g'},{name:'盐',amount:'少许'},{name:'料酒',amount:'少许'}],
+     steps:['毛豆焯熟，虾仁腌制','热锅加油炒虾仁','加入毛豆一起翻炒','加盐调味即可']},
+    {name:'韭菜炒鸡蛋',colors:['green','yellow'],time:'10分钟',difficulty:'简单',cal:170,
+     ingredients:[{name:'韭菜',amount:'200g'},{name:'鸡蛋',amount:'3个'},{name:'盐',amount:'少许'}],
+     steps:['韭菜切段，鸡蛋打散','热锅加油炒鸡蛋盛出','再炒韭菜至断生','放入鸡蛋翻炒','加盐调味出锅']},
+  ];
 
-只返回如下JSON，不要有任何额外文字或代码块标记：
-[{"name":"菜名","colors":["red","green"],"time":"20分钟","difficulty":"简单","cal":320,"ingredients":[{"name":"食材","amount":"100g"}],"steps":["步骤1","步骤2"]}]`;
+  // 按勾选食材匹配菜谱（匹配度排序）
+  const scored=RECIPES.map(r=>{
+    const score=names.filter(n=>r.ingredients.some(i=>i.name.includes(n)||n.includes(i.name))).length;
+    return{...r,score};
+  }).sort((a,b)=>b.score-a.score);
+
+  const matched=scored.slice(0,3);
 
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})
-    });
-    const data=await r.json();
-    console.log('API response:', JSON.stringify(data));
-    if(!data.content) throw new Error(JSON.stringify(data));
-    const text=data.content.map(b=>b.text||'').join('');
-    const recipes=JSON.parse(text.replace(/```json|```/g,'').trim());
-    renderRecipes(recipes,names);
-    btn.textContent='✦ 重新生成';
+    renderRecipes(matched,names);
+    btn.textContent='✦ 重新匹配';
   }catch(e){
     scroll.innerHTML=`<div style="padding:32px;text-align:center">
-      <div style="font-size:36px;opacity:.3;margin-bottom:12px">⚠️</div>
-      <div style="font-size:14px;color:var(--text2)">生成失败，请检查网络后重试</div>
-      <div style="font-size:12px;color:var(--text3);margin-top:6px">${e.message}</div>
+      <div style="font-size:14px;color:var(--text2)">匹配失败：${e.message}</div>
     </div>`;
     btn.textContent='✦ 重试';
   }finally{
