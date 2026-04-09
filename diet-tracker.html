@@ -37,6 +37,7 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
 .page{display:none;flex-direction:column;height:calc(100vh - 58px);overflow:hidden;animation:fadeIn .22s ease;}
 .page.active{display:flex;}
 #page-diary{overflow:hidden;}
+#page-ing{overflow:hidden;}
 #page-stats{overflow-y:auto;padding-bottom:20px;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 
@@ -101,28 +102,31 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
 .ing-search-wrap input:focus{border-color:var(--accent);}
 .ing-search-wrap input::placeholder{color:var(--text3);}
 .ing-search-ic{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:16px;pointer-events:none;}
-.five-col-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));flex:1;overflow:hidden;border-top:1px solid var(--border);}
-.col-panel{display:flex;flex-direction:column;border-right:1px solid var(--border);overflow:hidden;}
-.col-panel:last-child{border-right:none;}
-.col-header{padding:10px 8px 8px;text-align:center;border-bottom:1px solid var(--border);flex-shrink:0;}
-.col-header-dot{width:20px;height:20px;border-radius:50%;margin:0 auto 5px;}
-.col-header-label{font-size:12px;font-weight:500;display:block;}
-.col-header-benefit{font-size:10px;display:block;margin-top:2px;line-height:1.3;}
-.col-header-count{font-size:10px;margin-top:3px;display:block;opacity:.7;}
-.col-items{flex:1;overflow-y:auto;padding:6px 5px;display:flex;flex-direction:column;gap:4px;scrollbar-width:none;}
-.col-items::-webkit-scrollbar{display:none;}
-.col-item{border-radius:6px;padding:7px 7px 6px;border:1.5px solid transparent;cursor:pointer;position:relative;transition:all .12s;user-select:none;}
-.col-item:hover{filter:brightness(.95);}
-.col-item.selected{outline:2px solid var(--sel-color,#639922);outline-offset:1px;}
-.col-item-name{font-size:12px;font-weight:500;display:block;line-height:1.2;padding-right:14px;}
-.col-item-ben{font-size:10px;display:block;margin-top:2px;opacity:.72;line-height:1.2;}
-.checkmark{position:absolute;top:4px;right:5px;width:13px;height:13px;border-radius:50%;border:1.5px solid;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;transition:all .12s;}
-.col-add{padding:5px;border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:4px;}
-.col-add input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:5px 6px;font-size:11px;color:var(--text);font-family:var(--font-sans);outline:none;}
-.col-add input:focus{border-color:var(--accent);}
-.col-add input::placeholder{color:var(--text3);}
-.col-add-btn{width:100%;border:none;border-radius:5px;padding:5px;font-size:11px;font-weight:500;cursor:pointer;font-family:var(--font-sans);transition:filter .15s;}
-.col-add-btn:hover{filter:brightness(.9);}
+
+/* Row-per-color layout */
+.ing-rows{flex:1;overflow-y:auto;padding:10px 16px 20px;display:flex;flex-direction:column;gap:8px;scrollbar-width:none;}
+.ing-rows::-webkit-scrollbar{display:none;}
+.ing-color-row{border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);}
+.icr-head{display:flex;align-items:center;gap:8px;padding:9px 12px;flex-shrink:0;}
+.icr-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.icr-label{font-size:13px;font-weight:500;flex-shrink:0;}
+.icr-bene{font-size:11px;opacity:.65;margin-left:2px;}
+.icr-count{font-size:11px;opacity:.6;margin-left:auto;flex-shrink:0;}
+.icr-pills{padding:0 10px 10px;display:flex;flex-wrap:wrap;gap:6px;}
+.icr-pill{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:99px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid transparent;transition:all .12s;user-select:none;}
+.icr-pill:hover{filter:brightness(.93);}
+.icr-pill.selected{border-color:currentColor;box-shadow:0 0 0 2px rgba(0,0,0,0.06);}
+.icr-pill-check{width:12px;height:12px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0;transition:all .12s;}
+.icr-pill.selected .icr-pill-check{background:currentColor;}
+.icr-pill.selected .icr-pill-check::after{content:'✓';color:#fff;font-size:7px;}
+.icr-add{display:flex;gap:5px;padding:0 10px 10px;}
+.icr-add input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--text);font-family:var(--font-sans);outline:none;min-width:0;}
+.icr-add input:focus{border-color:var(--accent);}
+.icr-add input::placeholder{color:var(--text3);}
+.icr-add-btn{border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-sans);white-space:nowrap;flex-shrink:0;}
+.icr-pill:hover .icr-del-x{opacity:.6;}
+.icr-del-x:hover{opacity:1!important;}
+.icr-add-btn:hover{filter:brightness(.9);}
 
 /* Selection bar */
 .sel-bar{position:absolute;bottom:0;left:0;width:100%;background:var(--surface);border-top:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:10px;z-index:50;transform:translateY(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);}
@@ -318,6 +322,22 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
 .modal-save-btn{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:500;font-family:var(--font-sans);cursor:pointer;margin-top:14px;}
 .modal-save-btn:hover{background:#527f1c;}
 .modal-save-btn:disabled{background:var(--text3);cursor:not-allowed;}
+/* Entry choice */
+.entry-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;}
+.entry-btn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s;font-family:var(--font-sans);}
+.entry-btn:hover{border-color:var(--accent);background:var(--accent-bg);}
+.entry-btn-icon{font-size:30px;line-height:1;}
+.entry-btn-label{font-size:14px;font-weight:500;color:var(--text);}
+.entry-btn-sub{font-size:11px;color:var(--text2);text-align:center;line-height:1.5;}
+/* Free search step */
+.free-search-wrap{position:relative;margin-bottom:12px;}
+.free-search-wrap input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:11px 16px 11px 40px;font-size:15px;color:var(--text);font-family:var(--font-sans);outline:none;transition:border-color .2s;}
+.free-search-wrap input:focus{border-color:var(--accent);}
+.free-search-wrap .fsic{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--text3);pointer-events:none;}
+.free-result-hint{font-size:12px;color:var(--text3);margin-bottom:8px;}
+.free-confirm-card{background:var(--accent-bg);border:1px solid var(--green-border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px;}
+.free-confirm-name{font-size:16px;font-weight:500;color:var(--green-text);margin-bottom:4px;}
+.free-confirm-sub{font-size:12px;color:var(--green-text);opacity:.8;}
 </style>
 </head>
 <body>
@@ -373,7 +393,7 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
     <span class="ing-search-ic">⌕</span>
     <input type="text" id="ing-search" placeholder="搜索食材或功效…" oninput="renderIng()" />
   </div>
-  <div class="five-col-grid" id="five-col-grid"></div>
+  <div class="ing-rows" id="ing-rows"></div>
   <div class="sel-bar" id="sel-bar">
     <div class="sel-chips" id="sel-chips"></div>
     <button class="sel-clear" onclick="clearSel()">清除</button>
@@ -534,8 +554,24 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
     </div>
     <div class="modal-scroll" id="modal-scroll">
 
-      <!-- STEP 0: meal -->
-      <div id="step-0">
+      <!-- STEP entry: choose source -->
+      <div id="step-entry">
+        <div class="entry-btns">
+          <button class="entry-btn" onclick="chooseEntry('color')">
+            <div class="entry-btn-icon">🌈</div>
+            <div class="entry-btn-label">从食材库选</div>
+            <div class="entry-btn-sub">按五色分类</div>
+          </button>
+          <button class="entry-btn" onclick="chooseEntry('free')">
+            <div class="entry-btn-icon">🔍</div>
+            <div class="entry-btn-label">搜索食物</div>
+            <div class="entry-btn-sub">饼干、外卖、零食…</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 0: meal (hidden, kept for openModalColor compat) -->
+      <div id="step-0" style="display:none">
         <div class="meal-btns">
           <button class="meal-btn" onclick="pickMeal('早餐',this)">早餐</button>
           <button class="meal-btn" onclick="pickMeal('午餐',this)">午餐</button>
@@ -543,6 +579,9 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
           <button class="meal-btn" onclick="pickMeal('加餐',this)">加餐</button>
         </div>
       </div>
+
+      <!-- STEP 0.5: kept for compat -->
+      <div id="step-entry-old" style="display:none"></div>
 
       <!-- STEP 1: color -->
       <div id="step-1" style="display:none">
@@ -572,6 +611,37 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
             <div class="df-field"><label>脂肪 g</label><input type="number" id="d-fat" placeholder="0" oninput="autoCalc()"/></div>
           </div>
           <button class="modal-save-btn" id="modal-save-btn" onclick="saveFood()">保存记录</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: free search -->
+      <div id="step-3" style="display:none">
+        <div class="free-search-wrap">
+          <span class="fsic">⌕</span>
+          <input type="text" id="free-search-input" placeholder="输入食物名称，如：奥利奥、麦辣鸡腿堡…"
+            oninput="onFreeSearch(this.value)" />
+        </div>
+        <div id="free-search-hint" class="free-result-hint"></div>
+        <div id="free-confirm-card" class="free-confirm-card" style="display:none">
+          <div class="free-confirm-name" id="free-confirm-name"></div>
+          <div class="free-confirm-sub">点击「AI 查营养」自动填入营养数据</div>
+        </div>
+        <div class="detail-form" id="detail-form-free" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div class="detail-form-title">填写用量与营养（可选）</div>
+            <button onclick="queryNutritionFree()" style="background:var(--accent-bg);color:var(--green-text);border:1px solid var(--green-border);border-radius:6px;padding:5px 11px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-sans);white-space:nowrap;" id="ai-nutrition-btn-free">✦ AI 查营养</button>
+          </div>
+          <div id="ai-nutrition-status-free" style="display:none;font-size:12px;color:var(--text2);margin-bottom:8px;padding:6px 10px;background:var(--surface2);border-radius:6px;"></div>
+          <div class="detail-row">
+            <div class="df-field"><label>份量（克）</label><input type="number" id="df-weight" placeholder="100" min="1" oninput="autoCalcFree()"/></div>
+            <div class="df-field"><label>热量（千卡）<span id="cal-auto-tag-free" style="font-size:10px;color:var(--green-text);margin-left:4px;display:none">自动</span></label><input type="number" id="df-cal" placeholder="0" oninput="calManualEditFree()"/></div>
+          </div>
+          <div class="detail-row three">
+            <div class="df-field"><label>蛋白质 g</label><input type="number" id="df-pro" placeholder="0" oninput="autoCalcFree()"/></div>
+            <div class="df-field"><label>碳水 g</label><input type="number" id="df-carb" placeholder="0" oninput="autoCalcFree()"/></div>
+            <div class="df-field"><label>脂肪 g</label><input type="number" id="df-fat" placeholder="0" oninput="autoCalcFree()"/></div>
+          </div>
+          <button class="modal-save-btn" onclick="saveFoodFree()">保存记录</button>
         </div>
       </div>
 
@@ -705,8 +775,7 @@ function renderDiary(){
     tdLabel.className='td-meal-label';
     tdLabel.innerHTML=`
       <div class="td-meal-name">${meal}</div>
-      <div class="td-meal-kcal">${mCal>0?Math.round(mCal)+' 千卡':'-'}</div>
-      <button class="td-meal-add" onclick="openModal('${meal}')" title="添加食物">+</button>`;
+      <div class="td-meal-kcal">${mCal>0?Math.round(mCal)+' 千卡':'-'}</div>`;
     tr.appendChild(tdLabel);
     COLOR_ORDER.forEach(ck=>{
       const cp=COLOR_PROPS[ck];
@@ -761,16 +830,8 @@ const STEP_TITLES=[
 ];
 
 function openModal(meal){
-  mStep=0; mMeal=meal||'早餐'; mColorKey=null; mFoodName=null; mEditId=null; mCalAuto=true; mNutritionPer100={cal:0,pro:0,carb:0,fat:0};
-  // pre-select meal button
-  document.querySelectorAll('.meal-btn').forEach(b=>{
-    const active=b.textContent===mMeal;
-    b.classList.toggle('active',active);
-    const mc=MEAL_DOT_COLORS[b.textContent];
-    b.style.background=active?mc:'';
-    b.style.color=active?'#fff':'';
-    b.style.borderColor=active?mc:'';
-  });
+  mStep='entry'; mMeal=meal||'早餐'; mColorKey=null; mFoodName=null; mEditId=null; mCalAuto=true;
+  mNutritionPer100={cal:0,pro:0,carb:0,fat:0}; mFreeNutrPer100={cal:0,pro:0,carb:0,fat:0}; mFreeCalAuto=true;
   buildColorGrid();
   renderStep();
   document.getElementById('modal').classList.add('open');
@@ -778,14 +839,15 @@ function openModal(meal){
 function closeModal(){document.getElementById('modal').classList.remove('open');}
 function handleOverlayClick(e){if(e.target.id==='modal')closeModal();}
 function openModalColor(meal, colorKey){
-  openModal(meal);
-  mColorKey=colorKey; mStep=2;
-  document.getElementById('fp-search').value='';
-  document.getElementById('detail-form').style.display='none';
-  mFoodName=null;
-  renderFoodPickList('');
+  mStep='entry'; mMeal=meal; mColorKey=colorKey; mFoodName=null; mEditId=null;
+  mCalAuto=true; mNutritionPer100={cal:0,pro:0,carb:0,fat:0};
+  mFreeNutrPer100={cal:0,pro:0,carb:0,fat:0}; mFreeCalAuto=true;
+  buildColorGrid();
   renderStep();
+  document.getElementById('modal').classList.add('open');
 }
+
+// chooseEntry 里，如果已有 mColorKey（从表格 + 进来），直接跳对应颜色的食材列表
 
 function buildColorGrid(){
   const g=document.getElementById('color-pick-grid');
@@ -799,16 +861,25 @@ function buildColorGrid(){
 }
 
 function renderStep(){
-  [0,1,2].forEach(i=>{
-    document.getElementById('step-'+i).style.display=i===mStep?'':'none';
+  ['step-0','step-entry','step-1','step-2','step-3'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.display='none';
   });
-  const titles=[
-    ['选择餐次','这顿饭吃的什么时候？'],
-    ['选择食物颜色','五色饮食，均衡营养'],
-    ['选择具体食材','点击食材，填写用量'],
-  ];
-  document.getElementById('modal-title').textContent=titles[mStep][0];
-  document.getElementById('modal-sub').textContent=titles[mStep][1];
+  const titles={
+    'entry':['添加食物','请选择添加方式'],
+    0:['选择餐次','这顿饭吃的什么时候？'],
+    1:['选择食物颜色','五色饮食，均衡营养'],
+    2:['选择具体食材','点击食材，填写用量'],
+    3:['搜索食物','输入任意食物名称'],
+  };
+  const showId=mStep==='entry'?'step-entry':mStep===0?'step-0':`step-${mStep}`;
+  const el=document.getElementById(showId);
+  if(el) el.style.display='';
+  const colorNames={red:'红色',yellow:'黄色',white:'白色',green:'绿色',black:'黑色'};
+  const colorHint=mColorKey&&mStep==='entry'?` · ${colorNames[mColorKey]||''}`:'';
+  const [t,s]=titles[mStep]||['添加食物',''];
+  document.getElementById('modal-title').textContent=t;
+  document.getElementById('modal-sub').textContent=s+colorHint;
 }
 
 function pickMeal(name,btn){
@@ -819,8 +890,32 @@ function pickMeal(name,btn){
     b.classList.toggle('active',on);
     b.style.background=on?mc:''; b.style.color=on?'#fff':''; b.style.borderColor=on?mc:'';
   });
-  // 直接跳到颜色选择
-  setTimeout(()=>{ mStep=1; renderStep(); },120);
+}
+
+function chooseEntry(type){
+  if(type==='color'){
+    if(mColorKey){
+      // came from table + — skip color picker, go straight to food list
+      mStep=2;
+      document.getElementById('fp-search').value='';
+      document.getElementById('detail-form').style.display='none';
+      mFoodName=null;
+      renderFoodPickList('');
+      renderStep();
+    } else {
+      mStep=1; buildColorGrid(); renderStep();
+    }
+  } else {
+    mStep=3;
+    document.getElementById('free-search-input').value='';
+    document.getElementById('free-search-hint').textContent='';
+    document.getElementById('free-confirm-card').style.display='none';
+    document.getElementById('detail-form-free').style.display='none';
+    mFoodName=null;
+    if(!mColorKey) mColorKey='white';
+    renderStep();
+    setTimeout(()=>document.getElementById('free-search-input').focus(),200);
+  }
 }
 
 function pickColor(k,btn){
@@ -906,6 +1001,107 @@ function autoCalcByWeight(){
 function calManualEdit(){
   mCalAuto=false;
   document.getElementById('cal-auto-tag').style.display='none';
+}
+
+// ── 自由搜索路径 ──────────────────────────────────
+let mFreeNutrPer100={cal:0,pro:0,carb:0,fat:0};
+let mFreeCalAuto=true;
+
+function onFreeSearch(val){
+  const v=val.trim();
+  const hint=document.getElementById('free-search-hint');
+  const card=document.getElementById('free-confirm-card');
+  const form=document.getElementById('detail-form-free');
+  if(!v){hint.textContent='';card.style.display='none';form.style.display='none';mFoodName=null;return;}
+  mFoodName=v;
+  mColorKey='white'; // default color for free search items
+  hint.textContent='';
+  document.getElementById('free-confirm-name').textContent=v;
+  card.style.display='';
+  form.style.display='';
+  document.getElementById('df-weight').value='';
+  document.getElementById('df-cal').value='';
+  document.getElementById('df-pro').value='';
+  document.getElementById('df-carb').value='';
+  document.getElementById('df-fat').value='';
+  document.getElementById('cal-auto-tag-free').style.display='none';
+  document.getElementById('ai-nutrition-status-free').style.display='none';
+  mFreeNutrPer100={cal:0,pro:0,carb:0,fat:0};
+  mFreeCalAuto=true;
+}
+
+function autoCalcFree(){
+  if(!mFreeCalAuto) return;
+  const pro=parseFloat(document.getElementById('df-pro').value)||0;
+  const carb=parseFloat(document.getElementById('df-carb').value)||0;
+  const fat=parseFloat(document.getElementById('df-fat').value)||0;
+  if(pro||carb||fat){
+    document.getElementById('df-cal').value=Math.round(pro*4+carb*4+fat*9);
+    document.getElementById('cal-auto-tag-free').style.display='inline';
+  }
+}
+function calManualEditFree(){
+  mFreeCalAuto=false;
+  document.getElementById('cal-auto-tag-free').style.display='none';
+}
+
+async function queryNutritionFree(){
+  if(!mFoodName) return;
+  const btn=document.getElementById('ai-nutrition-btn-free');
+  const status=document.getElementById('ai-nutrition-status-free');
+  btn.textContent='查询中…'; btn.disabled=true;
+  status.style.display=''; status.textContent=`正在查询「${mFoodName}」的营养数据…`;
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:200,
+        messages:[{role:'user',content:`请给出「${mFoodName}」每100克的营养数据，只返回如下JSON，不要任何其他文字：
+{"cal":数字,"pro":数字,"carb":数字,"fat":数字}
+cal=热量千卡，pro=蛋白质克，carb=碳水克，fat=脂肪克，全部为数字。`}]
+      })
+    });
+    const data=await resp.json();
+    const text=data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
+    const n=JSON.parse(text);
+    mFreeNutrPer100={cal:n.cal,pro:n.pro,carb:n.carb,fat:n.fat};
+    mFreeCalAuto=true;
+    const w=parseFloat(document.getElementById('df-weight').value)||100;
+    const r=w/100;
+    document.getElementById('df-cal').value=Math.round(n.cal*r);
+    document.getElementById('df-pro').value=Math.round(n.pro*r*10)/10;
+    document.getElementById('df-carb').value=Math.round(n.carb*r*10)/10;
+    document.getElementById('df-fat').value=Math.round(n.fat*r*10)/10;
+    document.getElementById('cal-auto-tag-free').style.display='inline';
+    status.textContent=`每100g：热量${n.cal}千卡 · 蛋白${n.pro}g · 碳水${n.carb}g · 脂肪${n.fat}g`;
+    status.style.color='var(--green-text)';
+  }catch(e){
+    status.textContent='查询失败，请手动填写';
+    status.style.color='var(--red-text)';
+  }finally{
+    btn.textContent='✦ AI 查营养'; btn.disabled=false;
+  }
+}
+
+function saveFoodFree(){
+  if(!mFoodName) return;
+  const entry={
+    meal:mMeal, name:mFoodName,
+    colorKey:'white', colorDot:'#888780',
+    date:dateKey(getViewDate()),
+    weight:Math.round(parseFloat(document.getElementById('df-weight').value)||100),
+    cal:Math.round(parseFloat(document.getElementById('df-cal').value)||0),
+    pro:Math.round(parseFloat(document.getElementById('df-pro').value)||0),
+    carb:Math.round(parseFloat(document.getElementById('df-carb').value)||0),
+    fat:Math.round(parseFloat(document.getElementById('df-fat').value)||0),
+  };
+  foods.push({id:nid++,...entry});
+  ['df-weight','df-cal','df-pro','df-carb','df-fat'].forEach(id=>document.getElementById(id).value='');
+  mFoodName=null; mFreeCalAuto=true;
+  closeModal();
+  renderDiary();
 }
 
 async function queryNutrition(){
@@ -1004,36 +1200,38 @@ function goRecipe(){
 function renderIng(){
   const q=document.getElementById('ing-search').value.trim();
   const total=ingData.reduce((s,c)=>s+c.items.length,0);
-  document.getElementById('ing-sub').textContent=`共 ${total} 种 · 点击勾选后生成菜谱`;
+  document.getElementById('ing-sub').textContent=`共 ${total} 种食材 · 点击勾选后生成菜谱`;
   let html='';
   ingData.forEach(c=>{
     const filtered=q?c.items.filter(i=>i.n.includes(q)||i.b.includes(q)):c.items;
-    html+=`<div class="col-panel">
-      <div class="col-header" style="background:${c.bg};border-bottom-color:${c.bo}">
-        <div class="col-header-dot" style="background:${c.dot}"></div>
-        <span class="col-header-label" style="color:${c.nc}">${c.l}</span>
-        ${c.bene.split('·').map(b=>`<span class="col-header-benefit" style="color:${c.bc}">${b}</span>`).join('')}
-        <span class="col-header-count" style="color:${c.nc}">${filtered.length}种</span>
+    const pills=filtered.map(i=>{
+      const key=c.k+':'+i.n;
+      const on=sel.has(key);
+      return`<span class="icr-pill${on?' selected':''}"
+        style="background:${c.bg};color:${c.nc};border-color:${on?c.dot:'transparent'}"
+        onclick="toggle('${c.k}','${i.n}')">
+        ${i.n}
+        <span class="icr-pill-check" style="border-color:${c.dot};background:${on?c.dot:'transparent'}"></span>
+        <span onclick="event.stopPropagation();delIng('${c.k}','${i.n}')" class="icr-del-x" style="margin-left:3px;opacity:0;font-size:11px;cursor:pointer;transition:opacity .15s;" title="删除">×</span>
+      </span>`;
+    }).join('');
+    html+=`<div class="ing-color-row" style="background:${c.bg};border-color:${c.bo}">
+      <div class="icr-head" style="background:${c.bg}">
+        <div class="icr-dot" style="background:${c.dot}"></div>
+        <span class="icr-label" style="color:${c.nc}">${c.l}</span>
+        <span class="icr-bene" style="color:${c.bc}">${c.bene}</span>
+        <span class="icr-count" style="color:${c.nc}">${filtered.length}种</span>
+        <button onclick="toggleAddForm('${c.k}')" style="margin-left:8px;background:${c.bb};color:${c.bt};border:none;border-radius:99px;width:22px;height:22px;font-size:14px;cursor:pointer;line-height:1;flex-shrink:0;">+</button>
       </div>
-      <div class="col-items">
-        ${filtered.length?filtered.map(i=>{
-          const key=c.k+':'+i.n;
-          const on=sel.has(key);
-          return`<div class="col-item${on?' selected':''}" style="background:${c.bg};--sel-color:${c.dot}" onclick="toggle('${c.k}','${i.n}')">
-            <span class="col-item-name" style="color:${c.nc}">${i.n}</span>
-            <span class="col-item-ben" style="color:${c.bc}">${i.b}</span>
-            <div class="checkmark" style="border-color:${c.dot};color:${on?c.dot:'transparent'};background:${on?c.dot:'transparent'}">${on?'<span style="color:#fff;font-weight:700">✓</span>':''}</div>
-          </div>`;
-        }).join(''):`<span style="font-size:11px;color:var(--text3);padding:4px 2px">暂无</span>`}
-      </div>
-      <div class="col-add">
-        <input id="in-${c.k}" placeholder="食材名" onkeydown="if(event.key==='Enter')addIng('${c.k}')" />
-        <input id="ib-${c.k}" placeholder="功效" onkeydown="if(event.key==='Enter')addIng('${c.k}')" />
-        <button class="col-add-btn" style="background:${c.bb};color:${c.bt}" onclick="addIng('${c.k}')">+ 添加</button>
+      <div class="icr-pills">${pills||`<span style="font-size:12px;color:var(--text3);padding:0 2px">暂无</span>`}</div>
+      <div class="icr-add" id="add-form-${c.k}" style="display:none;">
+        <input id="in-${c.k}" placeholder="添加食材名" onkeydown="if(event.key==='Enter')addIng('${c.k}')"/>
+        <input id="ib-${c.k}" placeholder="功效" style="max-width:90px" onkeydown="if(event.key==='Enter')addIng('${c.k}')"/>
+        <button class="icr-add-btn" style="background:${c.bb};color:${c.bt}" onclick="addIng('${c.k}')">确认</button>
       </div>
     </div>`;
   });
-  document.getElementById('five-col-grid').innerHTML=html;
+  document.getElementById('ing-rows').innerHTML=html;
 }
 function addIng(k){
   const nEl=document.getElementById('in-'+k);
@@ -1043,6 +1241,18 @@ function addIng(k){
   const col=ingData.find(c=>c.k===k);
   if(!col.items.find(i=>i.n===name)) col.items.push({n:name,b:bEl.value.trim()||'营养丰富'});
   renderIng();
+}
+function delIng(k,name){
+  const col=ingData.find(c=>c.k===k);
+  col.items=col.items.filter(i=>i.n!==name);
+  renderIng();
+}
+function toggleAddForm(k){
+  const form=document.getElementById('add-form-'+k);
+  if(!form) return;
+  const visible=form.style.display!=='none';
+  form.style.display=visible?'none':'';
+  if(!visible) document.getElementById('in-'+k).focus();
 }
 
 // ── RECIPE PAGE ────────────────────────────────────
@@ -1511,6 +1721,32 @@ window.delFood = async function(id) {
   setSyncStatus('syncing');
   try {
     await deleteDoc(doc(db, "foods", String(id)));
+  } catch(e) {
+    console.error(e);
+    setSyncStatus('error');
+  }
+};
+
+// 覆盖 saveFoodFree：自由搜索路径写入 Firestore
+window.saveFoodFree = async function() {
+  if (!mFoodName) return;
+  setSyncStatus('syncing');
+  const entry = {
+    meal: mMeal, name: mFoodName,
+    colorKey: 'white', colorDot: '#888780',
+    date: dateKey(getViewDate()),
+    weight: Math.round(parseFloat(document.getElementById('df-weight').value) || 100),
+    cal:    Math.round(parseFloat(document.getElementById('df-cal').value)    || 0),
+    pro:    Math.round(parseFloat(document.getElementById('df-pro').value)    || 0),
+    carb:   Math.round(parseFloat(document.getElementById('df-carb').value)   || 0),
+    fat:    Math.round(parseFloat(document.getElementById('df-fat').value)    || 0),
+    createdAt: Date.now()
+  };
+  try {
+    await addDoc(foodsCol, entry);
+    ['df-weight','df-cal','df-pro','df-carb','df-fat'].forEach(id => document.getElementById(id).value = '');
+    mFoodName = null; mFreeCalAuto = true;
+    closeModal();
   } catch(e) {
     console.error(e);
     setSyncStatus('error');
