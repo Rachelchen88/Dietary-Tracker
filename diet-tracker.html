@@ -356,7 +356,7 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
   </div>
   <div class="goal-card">
     <div class="goal-top">
-      <div><span class="eaten" id="eaten-cal">0</span><span class="goal-max"> / 2000 千卡</span></div>
+      <div><span class="eaten" id="eaten-cal">0</span><span class="goal-max" id="goal-max-label"> / 2000 千卡</span></div>
       <span style="font-size:13px;color:var(--text2)" id="remain-str">剩余 2000</span>
     </div>
     <div class="bar-track"><div class="bar-fill" id="cal-bar" style="width:0%"></div></div>
@@ -441,12 +441,12 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
     <div class="body-ring-card">
       <div class="brc-top">
         <div class="brc-ring">
-          <svg width="90" height="90" viewBox="0 0 90 90">
+          <svg width="90" height="90" viewBox="0 0 90 90" id="brc-ring">
             <circle cx="45" cy="45" r="38" fill="none" stroke="var(--accent-bg)" stroke-width="7"/>
             <circle cx="45" cy="45" r="38" fill="none" stroke="var(--accent)" stroke-width="7"
               stroke-linecap="round" stroke-dasharray="239" id="ring-progress"
               stroke-dashoffset="239" transform="rotate(-90 45 45)" style="transition:stroke-dashoffset .6s cubic-bezier(.4,0,.2,1)"/>
-            <text x="45" y="42" text-anchor="middle" font-size="11" fill="var(--text2)" font-family="var(--font-sans)">目标达成</text>
+            <text x="45" y="42" text-anchor="middle" font-size="11" fill="var(--text2)" font-family="var(--font-sans)" id="ring-label">目标进度</text>
             <text x="45" y="57" text-anchor="middle" font-size="14" font-weight="600" fill="var(--text)" font-family="var(--font-sans)" id="ring-pct-text">0%</text>
           </svg>
         </div>
@@ -652,7 +652,7 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
 
 <script>
 // ── DATA ──────────────────────────────────────────
-const GOAL=2000;
+let GOAL=2000; // 默认值，会被体重目标覆盖
 const MEALS=['早餐','午餐','晚餐','加餐'];
 const MCOLS={'早餐':'#EF9F27','午餐':'#639922','晚餐':'#E24B4A','加餐':'#888780'};
 const WDAYS=['周一','周二','周三','周四','周五','周六','周日'];
@@ -759,6 +759,7 @@ function renderDiary(){
 
   const t=dayFoods.reduce((a,f)=>({cal:a.cal+f.cal,pro:a.pro+f.pro,carb:a.carb+f.carb,fat:a.fat+f.fat}),{cal:0,pro:0,carb:0,fat:0});
   document.getElementById('eaten-cal').textContent=Math.round(t.cal);
+  document.getElementById('goal-max-label').textContent=` / ${GOAL} 千卡`;
   document.getElementById('remain-str').textContent=`剩余 ${Math.max(0,GOAL-Math.round(t.cal))}`;
   const pct=Math.min(100,t.cal/GOAL*100);
   const bar=document.getElementById('cal-bar');
@@ -1514,17 +1515,25 @@ async function saveGoal(){
   const pace=document.getElementById('goal-pace').value;
   if(!goalW) return;
   const entry={goalWeight:goalW, pace:parseFloat(pace), updatedAt:Date.now()};
+  const btn=document.querySelector('[onclick="saveGoal()"]');
   if(window.db){
     try{
       const {doc,setDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
       await setDoc(doc(window.db,'settings','goal'),entry);
-      // show brief confirmation
-      const btn=event.target;
-      btn.textContent='已保存 ✓'; btn.style.background='#3B6D11';
-      setTimeout(()=>{btn.textContent='保存目标';btn.style.background='';},1500);
-    }catch(e){console.error('saveGoal error',e);}
+      if(btn){btn.textContent='已保存 ✓';btn.style.background='#3B6D11';}
+      setTimeout(()=>{if(btn){btn.textContent='保存目标';btn.style.background='';}},1500);
+    }catch(e){
+      console.error('saveGoal error',e);
+      if(btn){btn.textContent='保存失败';btn.style.background='var(--red)';}
+      setTimeout(()=>{if(btn){btn.textContent='保存目标';btn.style.background='';}},1500);
+    }
+  } else {
+    // Firebase not ready, retry after 1s
+    setTimeout(saveGoal, 1000);
+    return;
   }
   renderGoalPlan();
+  renderBody();
 }
 
 async function loadGoal(){
@@ -1536,7 +1545,7 @@ async function loadGoal(){
       const {goalWeight,pace}=snap.data();
       document.getElementById('goal-weight').value=goalWeight||'';
       document.getElementById('goal-pace').value=pace||0.5;
-      renderGoalPlan();
+      renderGoalPlan(); // this will update GOAL and renderDiary
     }
   }catch(e){console.error('loadGoal error',e);}
 }
@@ -1559,7 +1568,12 @@ function renderGoalPlan(){
   const arriveStr=`${arriveDate.getMonth()+1}月${arriveDate.getDate()}日`;
   // daily calorie deficit needed: 1kg fat ≈ 7700kcal
   const dailyAdjust=Math.round(pace*7700/7);
-  const targetIntake=diff>0?GOAL-dailyAdjust:GOAL+dailyAdjust;
+  const BASE_GOAL=2000;
+  const targetIntake=Math.max(1200, diff>0?BASE_GOAL-dailyAdjust:BASE_GOAL+dailyAdjust);
+  // 联动饮食记录的目标热量
+  GOAL=targetIntake;
+  document.getElementById('goal-max-label').textContent=` / ${targetIntake} 千卡`;
+  renderDiary();
   planEl.innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
       <div style="background:var(--accent-bg);border-radius:var(--radius-sm);padding:10px 12px;">
@@ -1614,14 +1628,29 @@ function renderBody(){
     document.getElementById('brc-trend').textContent='';
   }
 
-  // ring: today intake vs goal
-  const todayIntake=foods.filter(f=>(f.date||todayKey())===todayKey()).reduce((s,f)=>s+f.cal,0);
+  // ring: weight goal progress
+  const todayIntake=(window.foods||foods).filter(f=>(f.date||todayKey())===todayKey()).reduce((s,f)=>s+f.cal,0);
   const todayBurn=exerciseLog.filter(e=>e.date===todayKey()).reduce((s,e)=>s+e.cal,0);
-  const pct=Math.min(100,Math.round(todayIntake/GOAL*100));
   const circumference=239;
+  const goalW=parseFloat(document.getElementById('goal-weight')?.value)||0;
+  let pct=0;
+  if(goalW&&latest){
+    // 以「起始体重 → 目标体重」为100%，计算已完成的进度
+    // 需要知道起始体重：取最早的体重记录
+    const earliest=sorted[0];
+    const startW=earliest?earliest.val:latest.val;
+    const totalDiff=Math.abs(startW-goalW);
+    const doneDiff=Math.abs(startW-latest.val);
+    pct=totalDiff>0?Math.min(100,Math.round(doneDiff/totalDiff*100)):0;
+    document.getElementById('ring-pct-text').textContent=pct+'%';
+    document.getElementById('ring-label').textContent='目标进度';
+  } else {
+    pct=Math.min(100,Math.round(todayIntake/GOAL*100));
+    document.getElementById('ring-pct-text').textContent=pct+'%';
+    document.getElementById('ring-label').textContent='热量达成';
+  }
   const offset=circumference-(pct/100*circumference);
   document.getElementById('ring-progress').setAttribute('stroke-dashoffset',offset);
-  document.getElementById('ring-pct-text').textContent=pct+'%';
   // net
   document.getElementById('brc-intake').textContent=Math.round(todayIntake);
   document.getElementById('brc-burn').textContent=Math.round(todayBurn);
