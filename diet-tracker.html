@@ -356,8 +356,8 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
   </div>
   <div class="goal-card">
     <div class="goal-top">
-      <div><span class="eaten" id="eaten-cal">0</span><span class="goal-max" id="goal-max-label"> / 2000 千卡</span></div>
-      <span style="font-size:13px;color:var(--text2)" id="remain-str">剩余 2000</span>
+      <div><span class="eaten" id="eaten-cal">0</span><span class="goal-max" id="goal-max-label"> / … 千卡</span></div>
+      <span style="font-size:13px;color:var(--text2)" id="remain-str"></span>
     </div>
     <div class="bar-track"><div class="bar-fill" id="cal-bar" style="width:0%"></div></div>
   </div>
@@ -652,7 +652,7 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
 
 <script>
 // ── DATA ──────────────────────────────────────────
-let GOAL=2000; // 默认值，会被体重目标覆盖
+let GOAL=parseInt(localStorage.getItem('daily_goal'))||2000; // 从本地缓存恢复，默认2000
 const MEALS=['早餐','午餐','晚餐','加餐'];
 const MCOLS={'早餐':'#EF9F27','午餐':'#639922','晚餐':'#E24B4A','加餐':'#888780'};
 const WDAYS=['周一','周二','周三','周四','周五','周六','周日'];
@@ -1572,6 +1572,7 @@ function renderGoalPlan(){
   const targetIntake=Math.max(1200, diff>0?BASE_GOAL-dailyAdjust:BASE_GOAL+dailyAdjust);
   // 联动饮食记录的目标热量
   GOAL=targetIntake;
+  localStorage.setItem('daily_goal', GOAL);
   document.getElementById('goal-max-label').textContent=` / ${targetIntake} 千卡`;
   renderDiary();
   planEl.innerHTML=`
@@ -1883,6 +1884,7 @@ onSnapshot(goalDocRef, (snap) => {
     const current = getBodyWeight();
     const diff = current - (goalWeight||current);
     GOAL = Math.max(1200, diff>0 ? BASE_GOAL-dailyAdjust : BASE_GOAL+dailyAdjust);
+    localStorage.setItem('daily_goal', GOAL);
     const label = document.getElementById('goal-max-label');
     if(label) label.textContent = ` / ${GOAL} 千卡`;
     renderDiary();
