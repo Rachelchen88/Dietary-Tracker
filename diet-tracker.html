@@ -1867,6 +1867,28 @@ onSnapshot(iq, (snapshot) => {
   });
   renderIng();
 }, err => console.error('ingredients snapshot error',err));
+
+// 实时监听体重目标设置
+const goalDocRef = doc(db,'settings','goal');
+onSnapshot(goalDocRef, (snap) => {
+  if(snap.exists()){
+    const {goalWeight, pace} = snap.data();
+    const gEl = document.getElementById('goal-weight');
+    const pEl = document.getElementById('goal-pace');
+    if(gEl) gEl.value = goalWeight||'';
+    if(pEl) pEl.value = pace||0.5;
+    // 计算并更新 GOAL
+    const dailyAdjust = Math.round((pace||0.5)*7700/7);
+    const BASE_GOAL = 2000;
+    const current = getBodyWeight();
+    const diff = current - (goalWeight||current);
+    GOAL = Math.max(1200, diff>0 ? BASE_GOAL-dailyAdjust : BASE_GOAL+dailyAdjust);
+    const label = document.getElementById('goal-max-label');
+    if(label) label.textContent = ` / ${GOAL} 千卡`;
+    renderDiary();
+    renderGoalPlan();
+  }
+}, err => console.error('settings snapshot error', err));
 window.saveFood = async function() {
   if (!mFoodName) return;
   const col = ingData.find(c => c.k === mColorKey);
