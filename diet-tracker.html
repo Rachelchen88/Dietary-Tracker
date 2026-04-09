@@ -737,6 +737,7 @@ function goToday(){
 }
 
 function renderDiary(){
+  if(window.foods) foods=window.foods; // 同步 Firebase 数据
   const vd=getViewDate();
   const vKey=dateKey(vd);
   const isToday=vKey===todayKey();
@@ -1115,6 +1116,7 @@ function saveFoodFree(){
 }
 
 async function queryNutrition(){
+  console.log('queryNutrition called, mFoodName=', mFoodName);
   if(!mFoodName) return;
   const btn=document.getElementById('ai-nutrition-btn');
   const status=document.getElementById('ai-nutrition-status');
@@ -1133,6 +1135,7 @@ cal=热量千卡，pro=蛋白质克，carb=碳水克，fat=脂肪克，全部为
       })
     });
     const data=await resp.json();
+    if(!data.content) throw new Error(data.error?.message||JSON.stringify(data));
     const text=data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
     const n=JSON.parse(text);
     mNutritionPer100={cal:n.cal,pro:n.pro,carb:n.carb,fat:n.fat};
@@ -1413,6 +1416,7 @@ function addToDiary(name,cal){
 
 // ── STATS ──────────────────────────────────────────
 function renderStats(){
+  if(window.foods) foods=window.foods;
   // 计算本周每天的热量（周一到周日）
   const today=new Date();
   // 找本周周一
@@ -1726,8 +1730,8 @@ function setSyncStatus(status) {
 // 实时监听 Firestore，数据变化自动刷新界面
 const q = query(foodsCol, orderBy("createdAt", "asc"));
 onSnapshot(q, (snapshot) => {
-  window.foods = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-  window.nid = Date.now(); // 不再用本地 nid
+  foods = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  window.foods = foods;
   renderDiary();
   setSyncStatus('synced');
 }, (err) => {
