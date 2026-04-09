@@ -1284,18 +1284,35 @@ function renderIng(){
   });
   document.getElementById('ing-rows').innerHTML=html;
 }
-function addIng(k){
+async function addIng(k){
   const nEl=document.getElementById('in-'+k);
   const bEl=document.getElementById('ib-'+k);
   const name=nEl.value.trim();
   if(!name){nEl.focus();return;}
   const col=ingData.find(c=>c.k===k);
-  if(!col.items.find(i=>i.n===name)) col.items.push({n:name,b:bEl.value.trim()||'营养丰富'});
+  if(col.items.find(i=>i.n===name)){nEl.value='';return;}
+  const entry={colorKey:k,name,benefit:bEl.value.trim()||'营养丰富',createdAt:Date.now()};
+  if(window.db){
+    try{
+      const {collection,addDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      await addDoc(collection(window.db,'ingredients'),entry);
+    }catch(e){console.error('addIng error',e);}
+  }
+  col.items.push({n:name,b:entry.benefit});
+  nEl.value=''; bEl.value='';
   renderIng();
 }
-function delIng(k,name){
+async function delIng(k,name){
   const col=ingData.find(c=>c.k===k);
   col.items=col.items.filter(i=>i.n!==name);
+  if(window.db){
+    try{
+      const {collection,query,where,getDocs,deleteDoc,doc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      const q=query(collection(window.db,'ingredients'),where('colorKey','==',k),where('name','==',name));
+      const snap=await getDocs(q);
+      snap.forEach(async d=>await deleteDoc(doc(window.db,'ingredients',d.id)));
+    }catch(e){console.error('delIng error',e);}
+  }
   renderIng();
 }
 function toggleAddForm(k){
@@ -1631,39 +1648,36 @@ function renderBody(){
   renderGoalPlan();
 }
 
-function saveWeight(){
+async function saveWeight(){
   const val=parseFloat(document.getElementById('w-val').value);
   if(!val||val<20||val>300){document.getElementById('w-val').focus();return;}
   const date=document.getElementById('w-date').value||todayKey();
-  weightLog.push({id:Date.now().toString(),date,val});
+  const entry={date,val,createdAt:Date.now()};
+  if(window.db){
+    try{
+      const {collection,addDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      await addDoc(collection(window.db,'weights'),entry);
+    }catch(e){console.error('saveWeight error',e);}
+  } else {
+    weightLog.push({id:Date.now().toString(),...entry});
+    renderBody();
+  }
   document.getElementById('w-val').value='';
-  renderBody();
 }
-function delWeight(id){
-  weightLog=weightLog.filter(w=>w.id!==id);
-  renderBody();
-}
-
-// auto-estimate calories from exercise type + duration
-document.addEventListener('change',e=>{
-  if(e.target.id==='ex-type'||e.target.id==='ex-min') estimateExCal();
-});
-document.addEventListener('input',e=>{
-  if(e.target.id==='ex-min') estimateExCal();
-});
-function estimateExCal(){
-  const typeVal=document.getElementById('ex-type').value.split('|')[0];
-  const min=parseFloat(document.getElementById('ex-min').value)||0;
-  const meta=EXERCISE_META[typeVal];
-  const weight=getBodyWeight();
-  if(meta&&min>0){
-    const cal=Math.round(meta.met*weight*3.5/200*min);
-    document.getElementById('ex-cal').placeholder=cal;
+async function delWeight(id){
+  if(window.db){
+    try{
+      const {deleteDoc,doc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      await deleteDoc(doc(window.db,'weights',String(id)));
+    }catch(e){console.error('delWeight error',e);}
+  } else {
+    weightLog=weightLog.filter(w=>w.id!==id);
+    renderBody();
   }
 }
 
-function saveExercise(){
-  const typeRaw=document.getElementById('ex-type').value; // "跑步|🏃"
+async function saveExercise(){
+  const typeRaw=document.getElementById('ex-type').value;
   const [name,icon]=typeRaw.split('|');
   const minutes=parseFloat(document.getElementById('ex-min').value);
   if(!minutes||minutes<1){document.getElementById('ex-min').focus();return;}
@@ -1671,14 +1685,40 @@ function saveExercise(){
   const weight=getBodyWeight();
   const autoCal=meta?Math.round(meta.met*weight*3.5/200*minutes):0;
   const cal=Math.round(parseFloat(document.getElementById('ex-cal').value)||autoCal);
-  exerciseLog.push({id:Date.now().toString(),date:todayKey(),name,icon:icon||'🏋',minutes,cal});
+  const entry={date:todayKey(),name,icon:icon||'🏋',minutes,cal,createdAt:Date.now()};
+  if(window.db){
+    try{
+      const {collection,addDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      await addDoc(collection(window.db,'exercises'),entry);
+    }catch(e){console.error('saveExercise error',e);}
+  } else {
+    exerciseLog.push({id:Date.now().toString(),...entry});
+    renderBody();
+  }
   document.getElementById('ex-min').value='';
   document.getElementById('ex-cal').value='';
-  renderBody();
 }
-function delExercise(id){
-  exerciseLog=exerciseLog.filter(e=>e.id!==id);
-  renderBody();
+async function delExercise(id){
+  if(window.db){
+    try{
+      const {deleteDoc,doc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      await deleteDoc(doc(window.db,'exercises',String(id)));
+    }catch(e){console.error('delExercise error',e);}
+  } else {
+    exerciseLog=exerciseLog.filter(e=>e.id!==id);
+    renderBody();
+  }
+}
+
+// auto-estimate calories from exercise type + duration
+document.addEventListener('change',e=>{if(e.target.id==='ex-type'||e.target.id==='ex-min')estimateExCal();});
+document.addEventListener('input',e=>{if(e.target.id==='ex-min')estimateExCal();});
+function estimateExCal(){
+  const typeVal=document.getElementById('ex-type').value.split('|')[0];
+  const min=parseFloat(document.getElementById('ex-min').value)||0;
+  const meta=EXERCISE_META[typeVal];
+  const weight=getBodyWeight();
+  if(meta&&min>0){document.getElementById('ex-cal').placeholder=Math.round(meta.met*weight*3.5/200*min);}
 }
 
 // ── INIT ──────────────────────────────────────────
@@ -1689,7 +1729,7 @@ renderIng();
 <!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, setDoc, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, setDoc, deleteDoc, doc, onSnapshot, query, orderBy, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDMUlBA5s1BDaKbPjt5irxLBXUjhHrWWCc",
@@ -1739,7 +1779,32 @@ onSnapshot(q, (snapshot) => {
   setSyncStatus('error');
 });
 
-// 覆盖 saveFood：写入 Firestore（支持新增和编辑）
+// 实时监听 weights
+const wq = query(collection(db,'weights'), orderBy("createdAt","asc"));
+onSnapshot(wq, (snapshot) => {
+  weightLog = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  if(document.getElementById('page-body').classList.contains('active')) renderBody();
+}, err => console.error('weights snapshot error',err));
+
+// 实时监听 exercises
+const eq = query(collection(db,'exercises'), orderBy("createdAt","asc"));
+onSnapshot(eq, (snapshot) => {
+  exerciseLog = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  if(document.getElementById('page-body').classList.contains('active')) renderBody();
+}, err => console.error('exercises snapshot error',err));
+
+// 实时监听自定义食材
+const iq = query(collection(db,'ingredients'), orderBy("createdAt","asc"));
+onSnapshot(iq, (snapshot) => {
+  snapshot.docs.forEach(d => {
+    const {colorKey,name,benefit} = d.data();
+    const col = ingData.find(c=>c.k===colorKey);
+    if(col && !col.items.find(i=>i.n===name)){
+      col.items.push({n:name, b:benefit||'营养丰富'});
+    }
+  });
+  renderIng();
+}, err => console.error('ingredients snapshot error',err));
 window.saveFood = async function() {
   if (!mFoodName) return;
   const col = ingData.find(c => c.k === mColorKey);
