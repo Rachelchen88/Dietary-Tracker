@@ -1376,6 +1376,8 @@ async function generate(){
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})
     });
     const data=await r.json();
+    console.log('API response:', JSON.stringify(data));
+    if(!data.content) throw new Error(JSON.stringify(data));
     const text=data.content.map(b=>b.text||'').join('');
     const recipes=JSON.parse(text.replace(/```json|```/g,'').trim());
     renderRecipes(recipes,names);
