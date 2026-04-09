@@ -57,42 +57,38 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
 .macro-val{font-size:18px;font-weight:500;font-family:var(--font-serif);}
 .macro-unit{font-size:11px;color:var(--text3);}
 
-/* Five-color meal table */
-.date-switcher{display:flex;align-items:center;margin:10px 24px 0;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border);overflow:hidden;}
+/* Date switcher */
+.date-switcher{display:flex;align-items:center;margin:10px 16px 0;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border);overflow:hidden;}
 .ds-btn{background:none;border:none;padding:8px 16px;font-size:18px;cursor:pointer;color:var(--text2);transition:all .15s;flex-shrink:0;line-height:1;}
 .ds-btn:hover{background:var(--surface);color:var(--text);}
 .ds-btn:disabled{opacity:.25;cursor:default;}
 .ds-label{flex:1;text-align:center;font-size:13px;font-weight:500;color:var(--text);padding:8px 4px;}
 .ds-today{font-size:11px;padding:4px 10px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-family:var(--font-sans);margin-right:4px;border-radius:4px;flex-shrink:0;}
 .ds-today:hover{background:#527f1c;}
-.meal-table-wrap{flex:1;overflow:auto;margin:0 24px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);}
-.meal-table{width:100%;border-collapse:collapse;table-layout:fixed;}
-/* header row */
-.meal-table thead th{padding:8px 6px;font-size:11px;font-weight:500;text-align:center;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:10;}
-.meal-table thead th:first-child{width:58px;text-align:left;padding-left:10px;color:var(--text2);}
-.th-color-dot{width:10px;height:10px;border-radius:50%;margin:0 auto 3px;}
-.th-color-label{display:block;font-size:11px;font-weight:500;}
-/* body */
-.meal-table tbody td{vertical-align:top;border-bottom:1px solid var(--border);border-right:1px solid var(--border);padding:0;}
-.meal-table tbody td:last-child{border-right:none;}
-.meal-table tbody tr:last-child td{border-bottom:none;}
-/* meal label cell */
-.td-meal-label{padding:10px 8px 10px 10px;width:58px;}
-.td-meal-name{font-size:12px;font-weight:500;color:var(--text);line-height:1.3;}
-.td-meal-kcal{font-size:10px;color:var(--text3);margin-top:3px;}
-.td-meal-add{display:block;margin-top:6px;width:22px;height:22px;border-radius:50%;border:1.5px dashed var(--border2);background:none;cursor:pointer;font-size:14px;line-height:1;color:var(--text3);display:flex;align-items:center;justify-content:center;transition:all .15s;}
-.td-meal-add:hover{border-color:var(--accent);color:var(--accent);}
-/* food cell */
-.td-foods{padding:6px 5px;min-height:52px;}
-.food-pill{display:flex;align-items:center;justify-content:space-between;gap:3px;border-radius:5px;padding:4px 5px;margin-bottom:3px;font-size:11px;font-weight:500;cursor:default;}
-.food-pill-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3;}
-.food-pill-cal{font-size:10px;opacity:.7;white-space:nowrap;flex-shrink:0;}
-.food-pill-del{background:none;border:none;cursor:pointer;font-size:11px;opacity:0;padding:0 0 0 2px;line-height:1;flex-shrink:0;transition:opacity .1s;}
-.food-pill:hover .food-pill-del{opacity:.6;}
-.food-pill-del:hover{opacity:1!important;}
-.td-add-btn{display:flex;align-items:center;justify-content:center;width:100%;background:none;border:none;cursor:pointer;font-size:16px;color:var(--border2);padding:4px 0;transition:color .15s;font-family:var(--font-sans);}
-.td-add-btn:hover{color:var(--accent);}
 
+/* Colorful meal cards */
+.meal-cards-wrap{flex:1;overflow-y:auto;padding:12px 16px 24px;display:flex;flex-direction:column;gap:16px;scrollbar-width:none;}
+.meal-cards-wrap::-webkit-scrollbar{display:none;}
+.meal-card{border-radius:var(--radius);border:1px solid;overflow:hidden;}
+.meal-card-head{padding:12px 14px;display:flex;justify-content:space-between;align-items:center;}
+.meal-card-name{font-size:14px;font-weight:500;}
+.meal-card-kcal{font-size:12px;font-weight:500;opacity:.75;}
+.meal-card-body{background:#EAF3DE;padding:8px 10px;display:flex;flex-direction:column;gap:6px;}
+.meal-food-row{display:flex;align-items:center;background:#C0DD97;border-radius:8px;overflow:hidden;border-bottom:none;}
+.meal-food-row::before{content:'';width:4px;background:#3B6D11;align-self:stretch;flex-shrink:0;}
+.meal-food-row-inner{flex:1;padding:9px 12px;display:flex;align-items:center;gap:8px;}
+.meal-food-name{font-size:13px;color:#27500A;font-weight:500;flex:1;cursor:pointer;}
+.meal-food-cal{font-size:11px;color:#27500A;white-space:nowrap;}
+.meal-food-del{background:none;border:none;cursor:pointer;color:#3B6D11;font-size:15px;padding:0 4px;line-height:1;flex-shrink:0;opacity:.6;}
+.meal-food-del:hover{opacity:1;color:#E24B4A;}
+.meal-food-row:last-of-type{border-bottom:none;}
+.meal-food-name{font-size:13px;color:#1a1a18;flex:1;cursor:pointer;}
+.meal-food-cal{font-size:12px;color:#666;white-space:nowrap;}
+.meal-food-del{background:none;border:none;cursor:pointer;color:#bbb;font-size:16px;padding:0 4px;line-height:1;flex-shrink:0;}
+.meal-food-del:hover{color:#E24B4A;}
+.meal-add-row{display:flex;gap:8px;padding:10px 12px 12px;background:#fff;}
+.meal-add-input{flex:1;border:1px solid rgba(0,0,0,0.15);border-radius:8px;padding:11px 14px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;}
+.meal-add-btn{border:none;border-radius:8px;padding:11px 18px;font-size:16px;font-weight:600;cursor:pointer;font-family:var(--font-sans);}
 /* PAGE 2: INGREDIENTS */
 .ing-header{padding:20px 24px 0;flex-shrink:0;}
 .ing-header h1{font-family:var(--font-serif);font-size:26px;font-weight:600;letter-spacing:-.3px;}
@@ -354,33 +350,19 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
     <button class="ds-today" id="ds-today-btn" onclick="goToday()" style="display:none">回今天</button>
     <button class="ds-btn" id="ds-next" onclick="shiftDay(1)" disabled>›</button>
   </div>
-  <div class="goal-card">
+  <div class="goal-card" style="margin:10px 16px 0;">
     <div class="goal-top">
       <div><span class="eaten" id="eaten-cal">0</span><span class="goal-max" id="goal-max-label"> / … 千卡</span></div>
       <span style="font-size:13px;color:var(--text2)" id="remain-str"></span>
     </div>
     <div class="bar-track"><div class="bar-fill" id="cal-bar" style="width:0%"></div></div>
   </div>
-  <div class="macro-row">
+  <div class="macro-row" style="margin:8px 16px 0;">
     <div class="macro-card"><div class="macro-label">蛋白质</div><div class="macro-val" id="m-pro">0<span class="macro-unit"> g</span></div></div>
     <div class="macro-card"><div class="macro-label">碳水化合物</div><div class="macro-val" id="m-carb">0<span class="macro-unit"> g</span></div></div>
     <div class="macro-card"><div class="macro-label">脂肪</div><div class="macro-val" id="m-fat">0<span class="macro-unit"> g</span></div></div>
   </div>
-  <div class="meal-table-wrap">
-    <table class="meal-table">
-      <thead>
-        <tr>
-          <th></th>
-          <th><div class="th-color-dot" style="background:#E24B4A"></div><span class="th-color-label" style="color:#A32D2D">红色</span></th>
-          <th><div class="th-color-dot" style="background:#EF9F27"></div><span class="th-color-label" style="color:#854F0B">黄色</span></th>
-          <th><div class="th-color-dot" style="background:#888780"></div><span class="th-color-label" style="color:#444441">白色</span></th>
-          <th><div class="th-color-dot" style="background:#639922"></div><span class="th-color-label" style="color:#3B6D11">绿色</span></th>
-          <th><div class="th-color-dot" style="background:#2C2C2A"></div><span class="th-color-label" style="color:#2C2C2A">黑色</span></th>
-        </tr>
-      </thead>
-      <tbody id="meal-table-body"></tbody>
-    </table>
-  </div>
+  <div class="meal-cards-wrap" id="meal-cards"></div>
 </div>
 
 <!-- PAGE 2: INGREDIENTS -->
@@ -769,33 +751,85 @@ function renderDiary(){
   document.getElementById('m-carb').innerHTML=Math.round(t.carb)+'<span class="macro-unit"> g</span>';
   document.getElementById('m-fat').innerHTML=Math.round(t.fat)+'<span class="macro-unit"> g</span>';
 
-  const tbody=document.getElementById('meal-table-body');
-  tbody.innerHTML='';
+  // meal color themes
+  const MEAL_THEMES={
+    '早餐':{bg:'#EAF3DE',border:'#C0DD97',text:'#3B6D11',btnBg:'#639922',btnText:'#fff'},
+    '午餐':{bg:'#EAF3DE',border:'#C0DD97',text:'#3B6D11',btnBg:'#639922',btnText:'#fff'},
+    '晚餐':{bg:'#EAF3DE',border:'#C0DD97',text:'#3B6D11',btnBg:'#639922',btnText:'#fff'},
+    '加餐':{bg:'#EAF3DE',border:'#C0DD97',text:'#3B6D11',btnBg:'#639922',btnText:'#fff'},
+  };
+
+  const container=document.getElementById('meal-cards');
+  container.innerHTML='';
   MEALS.forEach(meal=>{
-    const mCal=dayFoods.filter(f=>f.meal===meal).reduce((s,f)=>s+f.cal,0);
-    const tr=document.createElement('tr');
-    const tdLabel=document.createElement('td');
-    tdLabel.className='td-meal-label';
-    tdLabel.innerHTML=`
-      <div class="td-meal-name">${meal}</div>
-      <div class="td-meal-kcal">${mCal>0?Math.round(mCal)+' 千卡':'-'}</div>`;
-    tr.appendChild(tdLabel);
-    COLOR_ORDER.forEach(ck=>{
-      const cp=COLOR_PROPS[ck];
-      const items=dayFoods.filter(f=>f.meal===meal&&f.colorKey===ck);
-      const td=document.createElement('td');
-      td.className='td-foods';
-      const pills=items.map(f=>`
-        <div class="food-pill" style="background:${cp.bg};color:${cp.text}">
-          <span class="food-pill-name" onclick="editFood('${f.id}')" style="cursor:pointer">${f.name}</span>
-          ${f.cal>0?`<span class="food-pill-cal">${f.cal}</span>`:''}
-          <button class="food-pill-del" style="color:${cp.text}" onclick="delFood('${f.id}')">×</button>
-        </div>`).join('');
-      td.innerHTML=pills+`<button class="td-add-btn" onclick="openModalColor('${meal}','${ck}')" title="添加食物">+</button>`;
-      tr.appendChild(td);
-    });
-    tbody.appendChild(tr);
+    const th=MEAL_THEMES[meal];
+    const mFoods=dayFoods.filter(f=>f.meal===meal);
+    const mCal=mFoods.reduce((s,f)=>s+f.cal,0);
+
+    const foodRows=mFoods.map(f=>`
+      <div class="meal-food-row">
+        <div class="meal-food-row-inner">
+          <span class="meal-food-name" onclick="inlineEditFood(this,'${f.id}')">${f.name}</span>
+          ${f.cal>0?`<span class="meal-food-cal" id="cal-${f.id}">${f.cal}千卡</span>`:''}
+          <button class="meal-food-del" onclick="delFood('${f.id}')">×</button>
+        </div>
+      </div>`).join('');
+
+    const card=document.createElement('div');
+    card.className='meal-card';
+    card.style.cssText=`background:${th.bg};border-color:${th.border}`;
+    card.innerHTML=`
+      <div class="meal-card-head" style="background:${th.bg}">
+        <span class="meal-card-name" style="color:${th.text}">${meal}</span>
+        <span class="meal-card-kcal" style="color:${th.text}">${mCal>0?Math.round(mCal)+' 千卡':'—'}</span>
+      </div>
+      ${mFoods.length?`<div class="meal-card-body">${foodRows}</div>`:''}
+      <div class="meal-add-row" style="background:${th.bg}">
+        <input class="meal-add-input" id="add-input-${meal}"
+          style="background:${th.bg};border-color:${th.border};color:${th.text}"
+          placeholder="输入食物名，按回车添加…"
+          onkeydown="if(event.key==='Enter')quickAddFood('${meal}',this)"
+          onfocus="this.style.borderColor='${th.btnBg}'"
+          onblur="this.style.borderColor='${th.border}'"/>
+        <button class="meal-add-btn"
+          style="background:${th.btnBg};color:${th.btnText}"
+          onclick="quickAddFood('${meal}',document.getElementById('add-input-${meal}'))">+</button>
+      </div>`;
+    container.appendChild(card);
   });
+}
+async function quickAddFood(meal, inputEl){
+  const name=inputEl.value.trim();
+  if(!name) return;
+  inputEl.value='';
+  inputEl.placeholder='查询营养中…';
+  inputEl.disabled=true;
+  // look up nutrition
+  let n={cal:0,pro:0,carb:0,fat:0};
+  try{ n=await fetchNutrition(name); }catch(e){}
+  const entry={
+    meal, name,
+    colorKey:'white', colorDot:'#888780',
+    date:dateKey(getViewDate()),
+    weight:100,
+    cal:n.cal, pro:n.pro, carb:n.carb, fat:n.fat,
+    createdAt:Date.now(),
+  };
+  if(window.db){
+    try{
+      const {collection,addDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      await addDoc(collection(window.db,'foods'),entry);
+    }catch(e){
+      console.error(e);
+      foods.push({id:nid++,...entry});
+      renderDiary();
+    }
+  } else {
+    foods.push({id:nid++,...entry});
+    renderDiary();
+  }
+  inputEl.placeholder='输入食物名，按回车添加…';
+  inputEl.disabled=false;
 }
 async function delFood(id){
   if(window.db){
@@ -808,6 +842,54 @@ async function delFood(id){
     renderDiary();
   }
 }
+function inlineEditFood(el, id){
+  const f=foods.find(x=>String(x.id)===String(id));
+  if(!f) return;
+  const row=el.closest('.meal-food-row');
+  if(row.querySelector('.inline-edit-panel')) return;
+  const panel=document.createElement('div');
+  panel.className='inline-edit-panel';
+  panel.style.cssText='width:100%;padding:8px 12px 10px;background:rgba(255,255,255,0.9);border-top:0.5px solid #C0DD97;display:flex;flex-direction:column;gap:6px;';
+  panel.innerHTML=`
+    <div style="display:flex;gap:6px;">
+      <input id="ie-name-${id}" value="${f.name}" placeholder="食物名" style="flex:2;border:1px solid #C0DD97;border-radius:6px;padding:7px 9px;font-size:13px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#fff;"/>
+      <input id="ie-weight-${id}" type="number" value="${f.weight||''}" placeholder="克"
+        style="flex:1;border:1px solid #C0DD97;border-radius:6px;padding:7px 9px;font-size:13px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#fff;"
+        oninput="(function(){
+          const w=parseFloat(this.value)||0;
+          const base=${f.weight||100};
+          const baseCal=${f.cal||0};
+          if(w>0&&baseCal>0){
+            document.getElementById('ie-cal-${id}').value=Math.round(baseCal/base*w);
+          }
+        }).call(this)"/>
+      <input id="ie-cal-${id}" type="number" value="${f.cal||''}" placeholder="千卡" style="flex:1;border:1px solid #C0DD97;border-radius:6px;padding:7px 9px;font-size:13px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#fff;"/>
+    </div>
+    <div style="display:flex;gap:6px;">
+      <button onclick="saveInlineEdit('${id}')" style="flex:1;background:#639922;color:#fff;border:none;border-radius:6px;padding:7px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-sans);">保存</button>
+      <button onclick="renderDiary()" style="flex:1;background:#f0ede4;color:#555;border:none;border-radius:6px;padding:7px;font-size:13px;cursor:pointer;font-family:var(--font-sans);">取消</button>
+    </div>`;
+  row.appendChild(panel);
+  panel.querySelector(`#ie-name-${id}`).focus();
+}
+
+async function saveInlineEdit(id){
+  const f=foods.find(x=>String(x.id)===String(id));
+  if(!f) return;
+  const name=document.getElementById(`ie-name-${id}`)?.value.trim()||f.name;
+  const weight=parseFloat(document.getElementById(`ie-weight-${id}`)?.value)||f.weight;
+  const cal=Math.round(parseFloat(document.getElementById(`ie-cal-${id}`)?.value)||f.cal);
+  const updates={name,weight,cal};
+  Object.assign(f,updates);
+  if(window.db){
+    try{
+      const {doc,setDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      await setDoc(doc(window.db,'foods',String(id)),updates,{merge:true});
+    }catch(e){console.error(e);}
+  }
+  renderDiary();
+}
+
 function editFood(id){
   const f=foods.find(x=>String(x.id)===String(id));
   if(!f) return;
@@ -1404,9 +1486,73 @@ async function generate(){
   </div>`).join('');
 
   const names=selNames();
+  const SPOON_KEY='5d24e56dfd6043bd86552f2725bedd1f';
 
-  // 本地中文菜谱库，按食材匹配
-  const RECIPES=[
+  try{
+    // 用英文食材名搜索（Spoonacular是英文数据库）
+    const CN2EN={
+      '番茄':'tomato','西红柿':'tomato','菠菜':'spinach','西兰花':'broccoli',
+      '黄瓜':'cucumber','胡萝卜':'carrot','芹菜':'celery','青椒':'green pepper',
+      '大蒜':'garlic','洋葱':'onion','白萝卜':'radish','山药':'yam','莲藕':'lotus root',
+      '豆腐':'tofu','香菇':'shiitake','黑木耳':'black fungus','海带':'kelp',
+      '南瓜':'pumpkin','玉米':'corn','香蕉':'banana','苹果':'apple','草莓':'strawberry',
+      '猪肉':'pork','鸡肉':'chicken','牛肉':'beef','虾仁':'shrimp','鸡蛋':'egg',
+      '牛奶':'milk','豆浆':'soy milk','黑芝麻':'black sesame','枸杞':'goji berry',
+      '韭菜':'chive','苦瓜':'bitter melon','茄子':'eggplant','毛豆':'edamame',
+      '豌豆':'pea','生菜':'lettuce','百合':'lily bulb','银耳':'white fungus',
+    };
+    const engNames=names.map(n=>CN2EN[n]||n).slice(0,5);
+    const res=await fetch(`https://api.spoonacular.com/recipes/findByIngredients?ingredients=${encodeURIComponent(engNames.join(','))}&number=3&apiKey=${SPOON_KEY}`);
+    const list=await res.json();
+    if(!list.length) throw new Error('no results');
+
+    const details=await Promise.all(list.map(r=>
+      fetch(`https://api.spoonacular.com/recipes/${r.id}/information?apiKey=${SPOON_KEY}`).then(r=>r.json())
+    ));
+
+    const recipes=details.map(d=>{
+      const ings=(d.extendedIngredients||[]).slice(0,8).map(i=>({name:i.nameClean||i.name,amount:i.originalString||'适量'}));
+      const steps=((d.analyzedInstructions||[])[0]?.steps||[]).slice(0,6).map(s=>s.step);
+      const colors=[];
+      if(names.some(n=>['番茄','西红柿','胡萝卜','草莓','红椒'].includes(n))) colors.push('red');
+      if(names.some(n=>['南瓜','玉米','香蕉','姜','橙子'].includes(n))) colors.push('yellow');
+      if(names.some(n=>['豆腐','大蒜','洋葱','白萝卜','山药'].includes(n))) colors.push('white');
+      if(names.some(n=>['菠菜','西兰花','黄瓜','芹菜','生菜'].includes(n))) colors.push('green');
+      if(names.some(n=>['黑木耳','香菇','黑芝麻','海带'].includes(n))) colors.push('black');
+      return{
+        name:d.title,
+        colors:colors.length?colors:['white'],
+        time:`${d.readyInMinutes||30}分钟`,
+        difficulty:d.readyInMinutes<20?'简单':d.readyInMinutes<45?'中等':'较难',
+        cal:Math.round(d.nutrition?.nutrients?.find(n=>n.name==='Calories')?.amount||200),
+        ingredients:ings,
+        steps:steps.length?steps:['按常规方法烹饪即可'],
+      };
+    });
+    renderRecipes(recipes,names);
+    btn.textContent='✦ 重新生成';
+  }catch(e){
+    // 联网失败时降级到本地菜谱库
+    const scored=RECIPES.map(r=>{
+      const score=names.filter(n=>r.ingredients.some(i=>i.name.includes(n)||n.includes(i.name))).length;
+      return{...r,score};
+    }).sort((a,b)=>b.score-a.score);
+    const matched=scored.filter(r=>r.score>0).slice(0,3);
+    if(matched.length){
+      renderRecipes(matched,names);
+      btn.textContent='✦ 重新生成';
+    } else {
+      scroll.innerHTML=`<div style="padding:32px;text-align:center">
+        <div style="font-size:14px;color:var(--text2)">网络错误，暂无匹配菜谱</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:6px">${e.message}</div>
+      </div>`;
+      btn.textContent='✦ 重试';
+    }
+  }finally{
+    generating=false;btn.disabled=false;
+  }
+}
+const RECIPES=[
     {name:'番茄炒鸡蛋',colors:['red','yellow'],time:'15分钟',difficulty:'简单',cal:180,
      ingredients:[{name:'番茄',amount:'2个'},{name:'鸡蛋',amount:'3个'},{name:'盐',amount:'少许'},{name:'糖',amount:'少许'},{name:'葱',amount:'适量'}],
      steps:['番茄切块，鸡蛋打散备用','热锅加油，炒熟鸡蛋盛出','再加油爆香葱花，放入番茄翻炒','番茄出汁后加入鸡蛋','加盐、糖调味，翻炒均匀即可']},
@@ -1452,28 +1598,34 @@ async function generate(){
     {name:'韭菜炒鸡蛋',colors:['green','yellow'],time:'10分钟',difficulty:'简单',cal:170,
      ingredients:[{name:'韭菜',amount:'200g'},{name:'鸡蛋',amount:'3个'},{name:'盐',amount:'少许'}],
      steps:['韭菜切段，鸡蛋打散','热锅加油炒鸡蛋盛出','再炒韭菜至断生','放入鸡蛋翻炒','加盐调味出锅']},
-  ];
-
-  // 按勾选食材匹配菜谱（匹配度排序）
-  const scored=RECIPES.map(r=>{
-    const score=names.filter(n=>r.ingredients.some(i=>i.name.includes(n)||n.includes(i.name))).length;
-    return{...r,score};
-  }).sort((a,b)=>b.score-a.score);
-
-  const matched=scored.slice(0,3);
-
-  try{
-    renderRecipes(matched,names);
-    btn.textContent='✦ 重新匹配';
-  }catch(e){
-    scroll.innerHTML=`<div style="padding:32px;text-align:center">
-      <div style="font-size:14px;color:var(--text2)">匹配失败：${e.message}</div>
-    </div>`;
-    btn.textContent='✦ 重试';
-  }finally{
-    generating=false;btn.disabled=false;
-  }
-}
+    {name:'白萝卜炖排骨',colors:['white'],time:'60分钟',difficulty:'中等',cal:280,
+     ingredients:[{name:'白萝卜',amount:'1根'},{name:'排骨',amount:'500g'},{name:'姜',amount:'3片'},{name:'盐',amount:'少许'},{name:'葱',amount:'适量'}],
+     steps:['排骨焯水去血沫','白萝卜切块','锅中加水放入排骨和姜片煮开','加入白萝卜小火炖40分钟','加盐调味撒葱花']},
+    {name:'白萝卜丝炒肉',colors:['white'],time:'20分钟',difficulty:'简单',cal:200,
+     ingredients:[{name:'白萝卜',amount:'1根'},{name:'猪肉',amount:'100g'},{name:'生抽',amount:'1勺'},{name:'盐',amount:'少许'}],
+     steps:['白萝卜切丝，猪肉切丝','热锅加油炒肉丝至变色','加入萝卜丝翻炒','加生抽和盐调味','翻炒均匀出锅']},
+    {name:'凉拌白萝卜',colors:['white'],time:'10分钟',difficulty:'简单',cal:50,
+     ingredients:[{name:'白萝卜',amount:'半根'},{name:'醋',amount:'2勺'},{name:'盐',amount:'少许'},{name:'香油',amount:'少许'},{name:'糖',amount:'少许'}],
+     steps:['白萝卜切细丝','加盐腌10分钟挤去水分','加醋、糖、香油拌匀','可加辣椒油增味']},
+    {name:'白萝卜海带汤',colors:['white','black'],time:'30分钟',difficulty:'简单',cal:60,
+     ingredients:[{name:'白萝卜',amount:'半根'},{name:'海带',amount:'50g'},{name:'盐',amount:'少许'},{name:'姜',amount:'2片'}],
+     steps:['海带泡发切段，白萝卜切块','锅中加水煮开','放入姜片、海带和白萝卜','中火煮20分钟','加盐调味即可']},
+    {name:'莲藕排骨汤',colors:['white'],time:'60分钟',difficulty:'中等',cal:260,
+     ingredients:[{name:'莲藕',amount:'2节'},{name:'排骨',amount:'400g'},{name:'姜',amount:'3片'},{name:'盐',amount:'少许'}],
+     steps:['排骨焯水，莲藕切块','加水放排骨和姜煮开','加入莲藕小火炖40分钟','加盐调味']},
+    {name:'山药炒木耳',colors:['white','black'],time:'20分钟',difficulty:'简单',cal:110,
+     ingredients:[{name:'山药',amount:'200g'},{name:'黑木耳',amount:'50g'},{name:'胡萝卜',amount:'半根'},{name:'盐',amount:'少许'}],
+     steps:['山药切片焯水，木耳泡发，胡萝卜切片','热锅加油炒胡萝卜','加入山药和木耳翻炒','加盐调味出锅']},
+    {name:'冬瓜虾仁汤',colors:['white'],time:'25分钟',difficulty:'简单',cal:90,
+     ingredients:[{name:'冬瓜',amount:'300g'},{name:'虾仁',amount:'100g'},{name:'姜',amount:'2片'},{name:'盐',amount:'少许'}],
+     steps:['冬瓜去皮切块，虾仁洗净','锅中加水煮开放姜片','加入冬瓜煮10分钟','放入虾仁煮3分钟','加盐调味']},
+    {name:'番茄土豆汤',colors:['red','yellow'],time:'25分钟',difficulty:'简单',cal:130,
+     ingredients:[{name:'番茄',amount:'2个'},{name:'土豆',amount:'1个'},{name:'盐',amount:'少许'},{name:'葱',amount:'适量'}],
+     steps:['番茄切块，土豆切片','热锅加油炒番茄出汁','加水煮开放土豆','煮至土豆软烂','加盐撒葱花']},
+    {name:'枸杞山药粥',colors:['red','white'],time:'40分钟',difficulty:'简单',cal:160,
+     ingredients:[{name:'山药',amount:'150g'},{name:'枸杞',amount:'15g'},{name:'大米',amount:'80g'}],
+     steps:['山药去皮切丁，大米洗净','加水煮开放大米','加入山药丁','小火熬25分钟','放入枸杞再煮5分钟']},
+];
 
 function renderRecipes(recipes,selNames){
   const scroll=document.getElementById('recipe-scroll');
@@ -1577,7 +1729,7 @@ function renderStats(){
 }
 
 // ── BODY & EXERCISE ───────────────────────────────
-let weightLog=[]; // [{id,date,val}]
+let mGoalWeight=0; // 全局体重目标，从Firebase加载后更新
 let exerciseLog=[]; // [{id,date,name,icon,minutes,cal}]
 
 const EXERCISE_META={
@@ -1597,6 +1749,7 @@ async function saveGoal(){
   const goalW=parseFloat(document.getElementById('goal-weight').value);
   const pace=document.getElementById('goal-pace').value;
   if(!goalW) return;
+  mGoalWeight=goalW;
   const entry={goalWeight:goalW, pace:parseFloat(pace), updatedAt:Date.now()};
   const btn=document.querySelector('[onclick="saveGoal()"]');
   if(window.db){
@@ -1626,6 +1779,7 @@ async function loadGoal(){
     const snap=await getDoc(doc(window.db,'settings','goal'));
     if(snap.exists()){
       const {goalWeight,pace}=snap.data();
+      mGoalWeight=goalWeight||0;
       document.getElementById('goal-weight').value=goalWeight||'';
       document.getElementById('goal-pace').value=pace||0.5;
       renderGoalPlan(); // this will update GOAL and renderDiary
@@ -1716,7 +1870,7 @@ function renderBody(){
   const todayIntake=(window.foods||foods).filter(f=>(f.date||todayKey())===todayKey()).reduce((s,f)=>s+f.cal,0);
   const todayBurn=exerciseLog.filter(e=>e.date===todayKey()).reduce((s,e)=>s+e.cal,0);
   const circumference=239;
-  const goalW=parseFloat(document.getElementById('goal-weight')?.value)||0;
+  const goalW=mGoalWeight||parseFloat(document.getElementById('goal-weight')?.value)||0;
   let pct=0;
   if(goalW&&latest){
     // 以「起始体重 → 目标体重」为100%，计算已完成的进度
@@ -1957,6 +2111,7 @@ const goalDocRef = doc(db,'settings','goal');
 onSnapshot(goalDocRef, (snap) => {
   if(snap.exists()){
     const {goalWeight, pace} = snap.data();
+    mGoalWeight = goalWeight||0;
     const gEl = document.getElementById('goal-weight');
     const pEl = document.getElementById('goal-pace');
     if(gEl) gEl.value = goalWeight||'';
