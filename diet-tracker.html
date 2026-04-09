@@ -794,7 +794,17 @@ function renderDiary(){
     tbody.appendChild(tr);
   });
 }
-function delFood(id){foods=foods.filter(f=>String(f.id)!==String(id));renderDiary();}
+async function delFood(id){
+  if(window.db){
+    try{
+      const {deleteDoc,doc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      await deleteDoc(doc(window.db,'foods',String(id)));
+    }catch(e){console.error('Firebase delFood error',e);}
+  } else {
+    foods=foods.filter(f=>String(f.id)!==String(id));
+    renderDiary();
+  }
+}
 function editFood(id){
   const f=foods.find(x=>String(x.id)===String(id));
   if(!f) return;
@@ -1078,7 +1088,7 @@ cal=热量千卡，pro=蛋白质克，carb=碳水克，fat=脂肪克，全部为
     status.textContent=`每100g：热量${n.cal}千卡 · 蛋白${n.pro}g · 碳水${n.carb}g · 脂肪${n.fat}g`;
     status.style.color='var(--green-text)';
   }catch(e){
-    status.textContent='查询失败，请手动填写';
+    status.textContent='查询失败：'+e.message;
     status.style.color='var(--red-text)';
   }finally{
     btn.textContent='✦ AI 查营养'; btn.disabled=false;
@@ -1138,34 +1148,72 @@ cal=热量千卡，pro=蛋白质克，carb=碳水克，fat=脂肪克，全部为
     status.textContent=`每100g：热量${n.cal}千卡 · 蛋白${n.pro}g · 碳水${n.carb}g · 脂肪${n.fat}g`;
     status.style.color='var(--green-text)';
   }catch(e){
-    status.textContent='查询失败，请手动填写';
+    status.textContent='查询失败：'+e.message;
     status.style.color='var(--red-text)';
   }finally{
     btn.textContent='✦ AI 查营养'; btn.disabled=false;
   }
 }
 
-function saveFood(){
+async function saveFood(){
   if(!mFoodName) return;
   const col=ingData.find(c=>c.k===mColorKey);
   const entry={
     meal:mMeal, name:mFoodName,
     colorKey:mColorKey||'white', colorDot:col?col.dot:'#888780',
-    date: dateKey(getViewDate()),
+    date:dateKey(getViewDate()),
+    weight:Math.round(parseFloat(document.getElementById('d-weight').value)||100),
     cal:Math.round(parseFloat(document.getElementById('d-cal').value)||0),
     pro:Math.round(parseFloat(document.getElementById('d-pro').value)||0),
     carb:Math.round(parseFloat(document.getElementById('d-carb').value)||0),
     fat:Math.round(parseFloat(document.getElementById('d-fat').value)||0),
+    createdAt:Date.now(),
   };
-  if(mEditId){
-    foods=foods.map(f=>String(f.id)===String(mEditId)?{...f,...entry}:f);
+  if(window.db){
+    try{
+      const {collection,addDoc,setDoc,doc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      const foodsCol=collection(window.db,'foods');
+      if(mEditId){
+        await setDoc(doc(window.db,'foods',mEditId),entry,{merge:true});
+      } else {
+        await addDoc(foodsCol,entry);
+      }
+    }catch(e){console.error('Firebase saveFood error',e);}
   } else {
-    foods.push({id:nid++,...entry});
+    if(mEditId) foods=foods.map(f=>String(f.id)===String(mEditId)?{...f,...entry}:f);
+    else foods.push({id:nid++,...entry});
+    renderDiary();
   }
   ['d-weight','d-cal','d-pro','d-carb','d-fat'].forEach(id=>document.getElementById(id).value='');
   mCalAuto=true; mEditId=null;
   closeModal();
-  renderDiary();
+}
+
+async function saveFoodFree(){
+  if(!mFoodName) return;
+  const entry={
+    meal:mMeal, name:mFoodName,
+    colorKey:'white', colorDot:'#888780',
+    date:dateKey(getViewDate()),
+    weight:Math.round(parseFloat(document.getElementById('df-weight').value)||100),
+    cal:Math.round(parseFloat(document.getElementById('df-cal').value)||0),
+    pro:Math.round(parseFloat(document.getElementById('df-pro').value)||0),
+    carb:Math.round(parseFloat(document.getElementById('df-carb').value)||0),
+    fat:Math.round(parseFloat(document.getElementById('df-fat').value)||0),
+    createdAt:Date.now(),
+  };
+  if(window.db){
+    try{
+      const {collection,addDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      await addDoc(collection(window.db,'foods'),entry);
+    }catch(e){console.error('Firebase saveFoodFree error',e);}
+  } else {
+    foods.push({id:nid++,...entry});
+    renderDiary();
+  }
+  ['df-weight','df-cal','df-pro','df-carb','df-fat'].forEach(id=>document.getElementById(id).value='');
+  mFoodName=null; mFreeCalAuto=true;
+  closeModal();
 }
 
 // ── INGREDIENTS ────────────────────────────────────
@@ -1651,6 +1699,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+window.db = db; // expose for saveFood/saveFoodFree
 const foodsCol = collection(db, "foods");
 
 // 显示同步状态
