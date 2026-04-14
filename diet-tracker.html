@@ -133,6 +133,31 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
 .sel-go{background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-sans);white-space:nowrap;flex-shrink:0;}
 .sel-go:hover{background:#527f1c;}
 
+/* Saved recipes */
+.saved-recipes{margin:0 24px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.saved-head{padding:11px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.saved-head-title{font-size:13px;font-weight:500;color:var(--text);}
+.saved-filter{display:flex;gap:5px;}
+.saved-filter-btn{font-size:11px;padding:3px 9px;border-radius:99px;border:none;cursor:pointer;font-family:var(--font-sans);transition:all .15s;}
+.saved-filter-btn.active{background:var(--accent);color:#fff;}
+.saved-filter-btn:not(.active){background:var(--surface2);color:var(--text2);}
+.saved-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:0.5px solid var(--border);cursor:pointer;text-decoration:none;}
+.saved-item:last-child{border-bottom:none;}
+.saved-item:hover{background:var(--surface2);}
+.saved-item-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.saved-item-info{flex:1;min-width:0;}
+.saved-item-title{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.saved-item-meta{display:flex;align-items:center;gap:6px;margin-top:2px;}
+.saved-item-tag{font-size:10px;padding:1px 6px;border-radius:4px;font-weight:500;}
+.saved-item-host{font-size:11px;color:var(--text3);}
+.saved-item-del{background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:2px 4px;flex-shrink:0;line-height:1;}
+.saved-item-del:hover{color:var(--red);}
+.saved-add{display:flex;gap:6px;padding:8px 12px 10px;border-top:1px solid var(--border);}
+.saved-add input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 11px;font-size:13px;color:var(--text);font-family:var(--font-sans);outline:none;}
+.saved-add input:focus{border-color:var(--accent);}
+.saved-add-btn{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-sans);}
+.saved-empty{padding:16px;font-size:13px;color:var(--text3);text-align:center;}
+
 /* PAGE 3: RECIPE */
 .recipe-header{padding:20px 24px 0;flex-shrink:0;}
 .recipe-header h1{font-family:var(--font-serif);font-size:26px;font-weight:600;letter-spacing:-.3px;}
@@ -386,19 +411,70 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
 <!-- PAGE 3: RECIPE -->
 <div class="page" id="page-recipe">
   <div class="recipe-header">
-    <h1>AI 菜谱</h1>
-    <p>勾选食材，AI 为你设计专属菜肴</p>
+    <h1>菜谱</h1>
+    <p>点菜谱名添加链接，点格子添加食材</p>
   </div>
-  <div class="recipe-top">
-    <div class="recipe-selected-row" id="r-sel-row">
-      <span class="recipe-hint">请先在食材库中勾选食材</span>
+  <div style="padding:10px 16px 8px;display:flex;gap:8px;">
+    <input id="new-recipe-input" placeholder="输入菜谱名称…"
+      style="flex:1;background:#fff;border:1px solid #e0dfd8;border-radius:8px;padding:9px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;"
+      onkeydown="if(event.key==='Enter')addRecipeRow()"/>
+    <button onclick="addRecipeRow()"
+      style="background:#639922;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font-sans);">+ 新建</button>
+  </div>
+  <div style="flex:1;overflow:auto;padding:0 16px 20px;">
+    <table id="recipe-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead>
+        <tr>
+          <th style="padding:8px 10px;text-align:left;border:1px solid #e0dfd8;background:#f5f4f0;color:#555;font-weight:500;width:100px;min-width:80px;">菜谱</th>
+          <th style="padding:8px 6px;text-align:center;border:1px solid #F7C1C1;background:#FCEBEB;color:#A32D2D;font-weight:500;min-width:60px;">🔴 红</th>
+          <th style="padding:8px 6px;text-align:center;border:1px solid #FAC775;background:#FAEEDA;color:#854F0B;font-weight:500;min-width:60px;">🟡 黄</th>
+          <th style="padding:8px 6px;text-align:center;border:1px solid #D3D1C7;background:#F5F4F0;color:#444;font-weight:500;min-width:60px;">⚪ 白</th>
+          <th style="padding:8px 6px;text-align:center;border:1px solid #C0DD97;background:#EAF3DE;color:#3B6D11;font-weight:500;min-width:60px;">🟢 绿</th>
+          <th style="padding:8px 6px;text-align:center;border:1px solid #5F5E5A;background:#3C3C38;color:#F1EFE8;font-weight:500;min-width:60px;">⚫ 黑</th>
+        </tr>
+      </thead>
+      <tbody id="recipe-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- 菜谱名弹窗 -->
+  <div id="recipe-name-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:300;align-items:flex-end;justify-content:center;">
+    <div style="background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;">
+      <h2 style="font-size:16px;font-weight:500;color:#1a1a18;margin-bottom:14px;" id="rnm-title">编辑菜谱</h2>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">菜谱名称</label>
+        <input id="rnm-name" style="width:100%;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;"/>
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">链接（视频或文章，可选）</label>
+        <input id="rnm-url" placeholder="https://…" oninput="document.getElementById('rnm-link-btn').style.display=this.value.trim()?'':'none'" style="width:100%;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;"/>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">备注（可选）</label>
+        <textarea id="rnm-note" rows="2" placeholder="烹饪心得…" style="width:100%;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;resize:none;"></textarea>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="closeRecipeNameModal()" style="padding:12px 20px;background:#f5f4f0;border:none;border-radius:8px;font-size:14px;color:#888;cursor:pointer;font-family:var(--font-sans);">取消</button>
+        <button onclick="saveRecipeName()" style="flex:1;padding:12px;background:#639922;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font-sans);">保存</button>
+        <button onclick="openRecipeLink()" id="rnm-link-btn" style="padding:12px 16px;background:#EAF3DE;color:#3B6D11;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-family:var(--font-sans);display:none;">🔗 打开</button>
+        <button onclick="deleteRecipeRow()" style="padding:12px 16px;background:#FCEBEB;color:#A32D2D;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-family:var(--font-sans);">删除</button>
+      </div>
     </div>
-    <button class="recipe-gen-btn" id="gen-btn" onclick="generate()" disabled>✦ 生成菜谱</button>
   </div>
-  <div class="recipe-scroll" id="recipe-scroll">
-    <div class="recipe-empty">
-      <div class="recipe-empty-icon">🍳</div>
-      <div class="recipe-empty-text">勾选食材后，AI 将为你生成专属菜谱</div>
+
+  <!-- 食材弹窗 -->
+  <div id="recipe-ing-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:300;align-items:flex-end;justify-content:center;">
+    <div style="background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;">
+      <h2 style="font-size:16px;font-weight:500;color:#1a1a18;margin-bottom:4px;" id="rim-title">添加食材</h2>
+      <p style="font-size:12px;color:#888;margin-bottom:14px;" id="rim-sub"></p>
+      <div id="rim-tags" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;min-height:32px;"></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <input id="rim-input" placeholder="输入食材名…"
+          style="flex:1;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;"
+          onkeydown="if(event.key==='Enter')addIngToCell()"/>
+        <button onclick="addIngToCell()" style="background:#639922;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:14px;cursor:pointer;font-family:var(--font-sans);">添加</button>
+      </div>
+      <button onclick="closeRecipeIngModal()" style="width:100%;padding:12px;background:#f5f4f0;border:none;border-radius:8px;font-size:14px;color:#888;cursor:pointer;font-family:var(--font-sans);">完成</button>
     </div>
   </div>
 </div>
@@ -521,8 +597,7 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
   <div class="nav-item active" onclick="sw('diary',this)"><div class="nav-icon">📋</div><div class="nav-label">饮食记录</div></div>
-  <div class="nav-item" onclick="sw('ing',this)"><div class="nav-icon">🌿</div><div class="nav-label">食材库</div></div>
-  <div class="nav-item" onclick="sw('recipe',this)"><div class="nav-icon">🍳</div><div class="nav-label">AI 菜谱</div></div>
+  <div class="nav-item" onclick="sw('recipe',this)"><div class="nav-icon">🍳</div><div class="nav-label">菜谱</div></div>
   <div class="nav-item" onclick="sw('body',this)"><div class="nav-icon">⚖️</div><div class="nav-label">体重运动</div></div>
   <div class="nav-item" onclick="sw('stats',this)"><div class="nav-icon">📊</div><div class="nav-label">统计</div></div>
 </nav>
@@ -681,7 +756,7 @@ function sw(id,el){
   document.getElementById('page-'+id).classList.add('active');
   el.classList.add('active');
   if(id==='stats') renderStats();
-  if(id==='recipe') syncRecipe();
+  if(id==='recipe'){ loadRecipeRows(); }
   if(id==='body'){ renderBody(); loadGoal(); }
 }
 
@@ -785,34 +860,36 @@ function renderDiary(){
       </div>
       ${mFoods.length?`<div class="meal-card-body">${foodRows}</div>`:''}
       <div class="meal-add-row" style="background:${th.bg}">
-        <input class="meal-add-input" id="add-input-${meal}"
-          style="background:${th.bg};border-color:${th.border};color:${th.text}"
-          placeholder="输入食物名，按回车添加…"
-          onkeydown="if(event.key==='Enter')quickAddFood('${meal}',this)"
+        <input class="meal-add-input" id="add-name-${meal}"
+          style="flex:2;background:${th.bg};border-color:${th.border};color:${th.text}"
+          placeholder="食物名…"
           onfocus="this.style.borderColor='${th.btnBg}'"
-          onblur="this.style.borderColor='${th.border}'"/>
+          onblur="this.style.borderColor='${th.border}'"
+          onkeydown="if(event.key==='Enter')document.getElementById('add-cal-${meal}').focus()"/>
+        <input class="meal-add-input" id="add-cal-${meal}" type="number" min="0"
+          style="flex:1;background:${th.bg};border-color:${th.border};color:${th.text}"
+          placeholder="千卡"
+          onfocus="this.style.borderColor='${th.btnBg}'"
+          onblur="this.style.borderColor='${th.border}'"
+          onkeydown="if(event.key==='Enter')quickAddFood('${meal}')"/>
         <button class="meal-add-btn"
           style="background:${th.btnBg};color:${th.btnText}"
-          onclick="quickAddFood('${meal}',document.getElementById('add-input-${meal}'))">+</button>
+          onclick="quickAddFood('${meal}')">+</button>
       </div>`;
     container.appendChild(card);
   });
 }
-async function quickAddFood(meal, inputEl){
-  const name=inputEl.value.trim();
-  if(!name) return;
-  inputEl.value='';
-  inputEl.placeholder='查询营养中…';
-  inputEl.disabled=true;
-  // look up nutrition
-  let n={cal:0,pro:0,carb:0,fat:0};
-  try{ n=await fetchNutrition(name); }catch(e){}
+async function quickAddFood(meal){
+  const nameEl=document.getElementById(`add-name-${meal}`);
+  const calEl=document.getElementById(`add-cal-${meal}`);
+  const name=nameEl.value.trim();
+  if(!name) return nameEl.focus();
+  const cal=Math.round(parseFloat(calEl.value)||0);
   const entry={
     meal, name,
     colorKey:'white', colorDot:'#888780',
     date:dateKey(getViewDate()),
-    weight:100,
-    cal:n.cal, pro:n.pro, carb:n.carb, fat:n.fat,
+    weight:0, cal, pro:0, carb:0, fat:0,
     createdAt:Date.now(),
   };
   if(window.db){
@@ -820,7 +897,6 @@ async function quickAddFood(meal, inputEl){
       const {collection,addDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
       await addDoc(collection(window.db,'foods'),entry);
     }catch(e){
-      console.error(e);
       foods.push({id:nid++,...entry});
       renderDiary();
     }
@@ -828,8 +904,8 @@ async function quickAddFood(meal, inputEl){
     foods.push({id:nid++,...entry});
     renderDiary();
   }
-  inputEl.placeholder='输入食物名，按回车添加…';
-  inputEl.disabled=false;
+  nameEl.value=''; calEl.value='';
+  nameEl.focus();
 }
 async function delFood(id){
   if(window.db){
@@ -852,20 +928,12 @@ function inlineEditFood(el, id){
   panel.style.cssText='width:100%;padding:8px 12px 10px;background:rgba(255,255,255,0.9);border-top:0.5px solid #C0DD97;display:flex;flex-direction:column;gap:6px;';
   panel.innerHTML=`
     <div style="display:flex;gap:6px;">
-      <input id="ie-name-${id}" value="${f.name}" placeholder="食物名" style="flex:2;border:1px solid #C0DD97;border-radius:6px;padding:7px 9px;font-size:13px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#fff;"/>
-      <input id="ie-weight-${id}" type="number" value="${f.weight||''}" placeholder="克"
-        style="flex:1;border:1px solid #C0DD97;border-radius:6px;padding:7px 9px;font-size:13px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#fff;"
-        oninput="(function(){
-          const w=parseFloat(this.value)||0;
-          const base=${f.weight||100};
-          const baseCal=${f.cal||0};
-          if(w>0&&baseCal>0){
-            document.getElementById('ie-cal-${id}').value=Math.round(baseCal/base*w);
-          }
-        }).call(this)"/>
-      <input id="ie-cal-${id}" type="number" value="${f.cal||''}" placeholder="千卡" style="flex:1;border:1px solid #C0DD97;border-radius:6px;padding:7px 9px;font-size:13px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#fff;"/>
+      <input id="ie-name-${id}" value="${f.name}" placeholder="食物名"
+        style="flex:2;border:1px solid #C0DD97;border-radius:6px;padding:7px 9px;font-size:13px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#fff;"/>
+      <input id="ie-cal-${id}" type="number" value="${f.cal||''}" placeholder="千卡"
+        style="flex:1;border:1px solid #C0DD97;border-radius:6px;padding:7px 9px;font-size:13px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#fff;"/>
     </div>
-    <div style="display:flex;gap:6px;">
+    <div style="display:flex;gap:6px;margin-top:6px;">
       <button onclick="saveInlineEdit('${id}')" style="flex:1;background:#639922;color:#fff;border:none;border-radius:6px;padding:7px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-sans);">保存</button>
       <button onclick="renderDiary()" style="flex:1;background:#f0ede4;color:#555;border:none;border-radius:6px;padding:7px;font-size:13px;cursor:pointer;font-family:var(--font-sans);">取消</button>
     </div>`;
@@ -1728,8 +1796,235 @@ function renderStats(){
   </div>`).join('');
 }
 
-// ── BODY & EXERCISE ───────────────────────────────
+// ── RECIPE TABLE ───────────────────────────────────
+let recipeRows=[]; // [{id,name,url,note,cells:{red:[],yellow:[],white:[],green:[],black:[]}}]
+let rEditId=null; // 当前编辑的菜谱id
+let rCellId=null; // 当前编辑的格子 {recipeId, colorKey}
+
+const COLOR_KEYS=['red','yellow','white','green','black'];
+const COLOR_META={
+  red:  {bg:'#FCEBEB',border:'#F7C1C1',text:'#A32D2D',tagBg:'#F7C1C1'},
+  yellow:{bg:'#FAEEDA',border:'#FAC775',text:'#854F0B',tagBg:'#FAC775'},
+  white: {bg:'#F5F4F0',border:'#D3D1C7',text:'#444441',tagBg:'#D3D1C7'},
+  green: {bg:'#EAF3DE',border:'#C0DD97',text:'#3B6D11',tagBg:'#C0DD97'},
+  black: {bg:'#3C3C38',border:'#5F5E5A',text:'#F1EFE8',tagBg:'#5F5E5A'},
+};
+
+function renderRecipeTable(){
+  const tbody=document.getElementById('recipe-tbody');
+  if(!tbody) return;
+  tbody.innerHTML=recipeRows.map(r=>{
+    const cells=COLOR_KEYS.map(ck=>{
+      const cm=COLOR_META[ck];
+      const tags=(r.cells[ck]||[]).map(ing=>
+        `<span style="display:inline-block;font-size:11px;padding:2px 7px;border-radius:4px;background:${cm.tagBg};color:${cm.text};margin:2px 2px 0 0;font-weight:500">${ing}</span>`
+      ).join('');
+      return`<td style="padding:6px;border:1px solid ${cm.border};background:${cm.bg};cursor:pointer;vertical-align:top;" onclick="openRecipeIngModal('${r.id}','${ck}')">
+        ${tags}
+        <div style="color:#ccc;font-size:16px;text-align:center;padding:${(r.cells[ck]||[]).length?'2':'4'}px 0">+</div>
+      </td>`;
+    }).join('');
+    return`<tr>
+      <td style="padding:9px 10px;border:1px solid #e0dfd8;background:#fff;cursor:pointer;vertical-align:middle;" onclick="openRecipeNameModal('${r.id}')">
+        <div style="font-size:13px;font-weight:500;color:#1a1a18">${r.name}</div>
+        ${r.url?`<div style="font-size:10px;color:#639922;margin-top:2px">🔗 链接</div>`:''}
+      </td>
+      ${cells}
+    </tr>`;
+  }).join('');
+}
+
+function addRecipeRow(){
+  const input=document.getElementById('new-recipe-input');
+  const name=input.value.trim();
+  if(!name) return;
+  const row={id:Date.now().toString(),name,url:'',note:'',cells:{red:[],yellow:[],white:[],green:[],black:[]}};
+  recipeRows.push(row);
+  input.value='';
+  renderRecipeTable();
+  saveRecipeRows();
+}
+
+function openRecipeNameModal(id){
+  const r=recipeRows.find(x=>x.id===id);
+  if(!r) return;
+  rEditId=id;
+  document.getElementById('rnm-title').textContent='编辑：'+r.name;
+  document.getElementById('rnm-name').value=r.name;
+  document.getElementById('rnm-url').value=r.url||'';
+  document.getElementById('rnm-note').value=r.note||'';
+  document.getElementById('rnm-link-btn').style.display=r.url?'':'none';
+  const m=document.getElementById('recipe-name-modal');
+  m.style.display='flex';
+}
+function openRecipeLink(){
+  const url=document.getElementById('rnm-url').value.trim();
+  if(url) window.open(url,'_blank');
+}
+function closeRecipeNameModal(){
+  document.getElementById('recipe-name-modal').style.display='none';
+  rEditId=null;
+}
+function saveRecipeName(){
+  const r=recipeRows.find(x=>x.id===rEditId);
+  if(!r) return;
+  r.name=document.getElementById('rnm-name').value.trim()||r.name;
+  r.url=document.getElementById('rnm-url').value.trim();
+  r.note=document.getElementById('rnm-note').value.trim();
+  closeRecipeNameModal();
+  renderRecipeTable();
+  saveRecipeRows();
+}
+function deleteRecipeRow(){
+  recipeRows=recipeRows.filter(x=>x.id!==rEditId);
+  closeRecipeNameModal();
+  renderRecipeTable();
+  saveRecipeRows();
+}
+
+function openRecipeIngModal(recipeId, colorKey){
+  rCellId={recipeId,colorKey};
+  const r=recipeRows.find(x=>x.id===recipeId);
+  const cm=COLOR_META[colorKey];
+  const labels={red:'红色',yellow:'黄色',white:'白色',green:'绿色',black:'黑色'};
+  document.getElementById('rim-title').textContent=r.name+' · '+labels[colorKey]+'食材';
+  document.getElementById('rim-sub').textContent='点 × 删除食材';
+  document.getElementById('rim-input').value='';
+  renderIngTags();
+  const m=document.getElementById('recipe-ing-modal');
+  m.style.display='flex';
+  setTimeout(()=>document.getElementById('rim-input').focus(),100);
+}
+function closeRecipeIngModal(){
+  document.getElementById('recipe-ing-modal').style.display='none';
+  rCellId=null;
+  renderRecipeTable();
+  saveRecipeRows();
+}
+function renderIngTags(){
+  if(!rCellId) return;
+  const r=recipeRows.find(x=>x.id===rCellId.recipeId);
+  const cm=COLOR_META[rCellId.colorKey];
+  const ings=r.cells[rCellId.colorKey]||[];
+  document.getElementById('rim-tags').innerHTML=ings.map(ing=>
+    `<span style="display:inline-flex;align-items:center;gap:4px;font-size:13px;padding:4px 10px;border-radius:99px;background:${cm.tagBg};color:${cm.text};font-weight:500">
+      ${ing}
+      <button onclick="delIngFromCell('${ing}')" style="background:none;border:none;cursor:pointer;color:${cm.text};font-size:14px;opacity:.6;padding:0;line-height:1">×</button>
+    </span>`
+  ).join('');
+}
+function addIngToCell(){
+  if(!rCellId) return;
+  const input=document.getElementById('rim-input');
+  const name=input.value.trim();
+  if(!name) return;
+  const r=recipeRows.find(x=>x.id===rCellId.recipeId);
+  if(!r.cells[rCellId.colorKey].includes(name)) r.cells[rCellId.colorKey].push(name);
+  input.value='';
+  renderIngTags();
+}
+function delIngFromCell(name){
+  if(!rCellId) return;
+  const r=recipeRows.find(x=>x.id===rCellId.recipeId);
+  r.cells[rCellId.colorKey]=r.cells[rCellId.colorKey].filter(i=>i!==name);
+  renderIngTags();
+}
+
+function saveRecipeRows(){
+  if(window.db){
+    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js').then(({doc,setDoc})=>{
+      setDoc(doc(window.db,'settings','recipes'),{rows:JSON.stringify(recipeRows),updatedAt:Date.now()},{merge:true}).catch(e=>console.error(e));
+    });
+  }
+  localStorage.setItem('recipeRows',JSON.stringify(recipeRows));
+}
+function loadRecipeRows(){
+  const local=localStorage.getItem('recipeRows');
+  if(local) try{recipeRows=JSON.parse(local);}catch(e){}
+  if(window.db){
+    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js').then(({doc,getDoc})=>{
+      getDoc(doc(window.db,'settings','recipes')).then(snap=>{
+        if(snap.exists()&&snap.data().rows){
+          try{recipeRows=JSON.parse(snap.data().rows);}catch(e){}
+          renderRecipeTable();
+        }
+      }).catch(e=>console.error(e));
+    });
+  }
+  renderRecipeTable();
+}
+let savedRecipes=[];
+let savedFilter='all';
+
+function getHostname(url){try{return new URL(url).hostname.replace('www.','');}catch(e){return url;}}
+function getType(url){
+  const u=url.toLowerCase();
+  if(u.includes('youtube')||u.includes('youtu.be')||u.includes('bilibili')||u.includes('douyin')||u.includes('tiktok')||u.includes('vimeo')) return 'video';
+  return 'article';
+}
+function getIcon(type){return type==='video'?'📺':'📄';}
+function getTagStyle(type){return type==='video'?'background:#FCEBEB;color:#A32D2D':'background:#EAF3DE;color:#3B6D11';}
+function getTagLabel(type){return type==='video'?'视频':'文章';}
+
+function renderSaved(){
+  const list=document.getElementById('saved-list');
+  if(!list) return;
+  const filtered=savedFilter==='all'?savedRecipes:savedRecipes.filter(r=>r.type===savedFilter);
+  if(!filtered.length){
+    list.innerHTML='<div class="saved-empty">暂无收藏，粘贴链接添加</div>';
+    return;
+  }
+  list.innerHTML=filtered.map(r=>`
+    <a class="saved-item" href="${r.url}" target="_blank">
+      <div class="saved-item-icon" style="background:${r.type==='video'?'#FCEBEB':'#EAF3DE'}">${getIcon(r.type)}</div>
+      <div class="saved-item-info">
+        <div class="saved-item-title">${r.title||r.url}</div>
+        <div class="saved-item-meta">
+          <span class="saved-item-tag" style="${getTagStyle(r.type)}">${getTagLabel(r.type)}</span>
+          <span class="saved-item-host">${getHostname(r.url)}</span>
+        </div>
+      </div>
+      <button class="saved-item-del" onclick="event.preventDefault();delSavedRecipe('${r.id}')">×</button>
+    </a>`).join('');
+}
+
+function filterSaved(f,btn){
+  savedFilter=f;
+  document.querySelectorAll('.saved-filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSaved();
+}
+
+async function saveRecipeLink(){
+  const input=document.getElementById('saved-url-input');
+  const url=input.value.trim();
+  if(!url) return;
+  const type=getType(url);
+  const title=getHostname(url)+' 菜谱';
+  const entry={id:Date.now().toString(),url,type,title,createdAt:Date.now()};
+  savedRecipes.unshift(entry);
+  input.value='';
+  renderSaved();
+  if(window.db){
+    try{
+      const {collection,addDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      await addDoc(collection(window.db,'savedRecipes'),entry);
+    }catch(e){console.error(e);}
+  }
+}
+
+async function delSavedRecipe(id){
+  savedRecipes=savedRecipes.filter(r=>r.id!==id);
+  renderSaved();
+  if(window.db){
+    try{
+      const {deleteDoc,doc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      await deleteDoc(doc(window.db,'savedRecipes',String(id)));
+    }catch(e){console.error(e);}
+  }
+}
 let mGoalWeight=0; // 全局体重目标，从Firebase加载后更新
+let weightLog=[]; // [{id,date,val}]
 let exerciseLog=[]; // [{id,date,name,icon,minutes,cal}]
 
 const EXERCISE_META={
@@ -2024,6 +2319,7 @@ function estimateExCal(){
 // ── INIT ──────────────────────────────────────────
 renderDiary();
 renderIng();
+loadRecipeRows();
 </script>
 
 <!-- Firebase SDK -->
@@ -2129,6 +2425,14 @@ onSnapshot(goalDocRef, (snap) => {
     renderGoalPlan();
   }
 }, err => console.error('settings snapshot error', err));
+
+// 实时监听收藏菜谱
+const srq = query(collection(db,'savedRecipes'), orderBy("createdAt","desc"));
+onSnapshot(srq, (snapshot) => {
+  savedRecipes = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderSaved();
+}, err => console.error('savedRecipes error',err));
+
 window.saveFood = async function() {
   if (!mFoodName) return;
   const col = ingData.find(c => c.k === mColorKey);
