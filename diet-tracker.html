@@ -69,8 +69,8 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
 /* Colorful meal cards */
 .meal-cards-wrap{flex:1;overflow-y:auto;padding:12px 16px 24px;display:flex;flex-direction:column;gap:16px;scrollbar-width:none;}
 .meal-cards-wrap::-webkit-scrollbar{display:none;}
-.meal-card{border-radius:var(--radius);border:1px solid;overflow:hidden;}
-.meal-card-head{padding:12px 14px;display:flex;justify-content:space-between;align-items:center;}
+.meal-card{border-radius:var(--radius);border:1px solid;}
+.meal-card-head{padding:12px 14px;display:flex;justify-content:space-between;align-items:center;border-radius:var(--radius) var(--radius) 0 0;}
 .meal-card-name{font-size:14px;font-weight:500;}
 .meal-card-kcal{font-size:12px;font-weight:500;opacity:.75;}
 .meal-card-body{background:#EAF3DE;padding:8px 10px;display:flex;flex-direction:column;gap:6px;}
@@ -81,14 +81,9 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
 .meal-food-cal{font-size:11px;color:#27500A;white-space:nowrap;}
 .meal-food-del{background:none;border:none;cursor:pointer;color:#3B6D11;font-size:15px;padding:0 4px;line-height:1;flex-shrink:0;opacity:.6;}
 .meal-food-del:hover{opacity:1;color:#E24B4A;}
-.meal-food-row:last-of-type{border-bottom:none;}
-.meal-food-name{font-size:13px;color:#1a1a18;flex:1;cursor:pointer;}
-.meal-food-cal{font-size:12px;color:#666;white-space:nowrap;}
-.meal-food-del{background:none;border:none;cursor:pointer;color:#bbb;font-size:16px;padding:0 4px;line-height:1;flex-shrink:0;}
-.meal-food-del:hover{color:#E24B4A;}
-.meal-add-row{display:flex;gap:8px;padding:10px 12px 12px;background:#fff;}
-.meal-add-input{flex:1;border:1px solid rgba(0,0,0,0.15);border-radius:8px;padding:11px 14px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;}
-.meal-add-btn{border:none;border-radius:8px;padding:11px 18px;font-size:16px;font-weight:600;cursor:pointer;font-family:var(--font-sans);}
+.meal-add-row{display:flex;gap:8px;padding:10px 12px 12px;flex-shrink:0;}
+.meal-add-input{flex:1;border:1px solid rgba(0,0,0,0.15);border-radius:8px;padding:11px 14px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;min-width:0;box-sizing:border-box;}
+.meal-add-btn{border:none;border-radius:8px;padding:11px 18px;font-size:16px;font-weight:600;cursor:pointer;font-family:var(--font-sans);flex-shrink:0;}
 /* PAGE 2: INGREDIENTS */
 .ing-header{padding:20px 24px 0;flex-shrink:0;}
 .ing-header h1{font-family:var(--font-serif);font-size:26px;font-weight:600;letter-spacing:-.3px;}
@@ -414,13 +409,13 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
     <h1>菜谱</h1>
     <p>点菜谱名添加链接，点格子添加食材</p>
   </div>
-  <div style="padding:10px 16px 8px;display:flex;gap:8px;">
-    <input id="new-recipe-input" placeholder="输入菜谱名称…"
-      style="flex:1;background:#fff;border:1px solid #e0dfd8;border-radius:8px;padding:9px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;"
-      onkeydown="if(event.key==='Enter')addRecipeRow()"/>
-    <button onclick="addRecipeRow()"
-      style="background:#639922;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font-sans);">+ 新建</button>
+  <div style="padding:10px 16px 8px;">
+    <input id="recipe-search" placeholder="🔍 搜索菜谱…"
+      style="width:100%;background:#fff;border:1px solid #e0dfd8;border-radius:8px;padding:9px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;"
+      oninput="renderRecipeTable()"/>
   </div>
+  <!-- 分类标签栏 -->
+  <div id="cat-bar" style="padding:0 16px 8px;display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;"></div>
   <div style="flex:1;overflow:auto;padding:0 16px 20px;">
     <table id="recipe-table" style="width:100%;border-collapse:collapse;font-size:13px;">
       <thead>
@@ -444,6 +439,10 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
       <div style="margin-bottom:10px;">
         <label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">菜谱名称</label>
         <input id="rnm-name" style="width:100%;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;"/>
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:11px;color:#888;display:block;margin-bottom:6px;">分类</label>
+        <div id="rnm-cats" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
       </div>
       <div style="margin-bottom:10px;">
         <label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">链接（视频或文章，可选）</label>
@@ -1797,9 +1796,53 @@ function renderStats(){
 }
 
 // ── RECIPE TABLE ───────────────────────────────────
-let recipeRows=[]; // [{id,name,url,note,cells:{red:[],yellow:[],white:[],green:[],black:[]}}]
-let rEditId=null; // 当前编辑的菜谱id
-let rCellId=null; // 当前编辑的格子 {recipeId, colorKey}
+let recipeRows=[]; // [{id,name,cat,url,note,cells:{red:[],yellow:[],white:[],green:[],black:[]}}]
+let recipeCategories=['汤','炒菜','甜品','主食','凉菜'];
+let activeCat='all';
+let rEditId=null;
+let rCellId=null;
+
+function renderCatBar(){
+  const bar=document.getElementById('cat-bar');
+  if(!bar) return;
+  const all=[
+    {k:'all',l:'全部'},
+    ...recipeCategories.map(c=>({k:c,l:c}))
+  ];
+  bar.innerHTML=all.map(({k,l})=>`
+    <div onclick="setActiveCat('${k}')"
+      style="flex-shrink:0;padding:5px 13px;border-radius:99px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;border:1.5px solid ${activeCat===k?'#639922':'#e0dfd8'};background:${activeCat===k?'#639922':'#fff'};color:${activeCat===k?'#fff':'#555'}">${l}</div>
+  `).join('')+`
+    <div id="cat-add-btn" onclick="showCatInput()"
+      style="flex-shrink:0;padding:5px 13px;border-radius:99px;font-size:12px;cursor:pointer;white-space:nowrap;border:1.5px solid #e0dfd8;background:#f5f4f0;color:#aaa">＋ 新分类</div>
+    <div id="cat-add-row" style="display:none;flex-shrink:0;display:none;align-items:center;gap:4px;">
+      <input id="cat-add-input" placeholder="分类名…"
+        style="border:1.5px solid #639922;border-radius:99px;padding:4px 10px;font-size:12px;color:#1a1a18;font-family:var(--font-sans);outline:none;width:80px;"
+        onkeydown="if(event.key==='Enter')saveNewCat();if(event.key==='Escape')hideCatInput()"/>
+      <button onclick="saveNewCat()" style="background:#639922;color:#fff;border:none;border-radius:99px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:var(--font-sans);">添加</button>
+    </div>`;
+}
+function showCatInput(){
+  document.getElementById('cat-add-btn').style.display='none';
+  const row=document.getElementById('cat-add-row');
+  row.style.display='flex';
+  setTimeout(()=>document.getElementById('cat-add-input')?.focus(),50);
+}
+function hideCatInput(){
+  document.getElementById('cat-add-btn').style.display='';
+  document.getElementById('cat-add-row').style.display='none';
+}
+function setActiveCat(cat){ activeCat=cat; renderCatBar(); renderRecipeTable(); }
+function openNewCatModal(){ showCatInput(); }
+function saveNewCat(){
+  const input=document.getElementById('cat-add-input');
+  const name=input?.value.trim();
+  if(!name) return;
+  if(!recipeCategories.includes(name)) recipeCategories.push(name);
+  hideCatInput();
+  renderCatBar();
+  saveRecipeRows();
+}
 
 const COLOR_KEYS=['red','yellow','white','green','black'];
 const COLOR_META={
@@ -1813,7 +1856,10 @@ const COLOR_META={
 function renderRecipeTable(){
   const tbody=document.getElementById('recipe-tbody');
   if(!tbody) return;
-  tbody.innerHTML=recipeRows.map(r=>{
+  const q=(document.getElementById('recipe-search')?.value||'').trim();
+  let filtered=activeCat==='all'?recipeRows:recipeRows.filter(r=>r.cat===activeCat);
+  if(q) filtered=filtered.filter(r=>r.name.includes(q));
+  tbody.innerHTML=filtered.map(r=>{
     const cells=COLOR_KEYS.map(ck=>{
       const cm=COLOR_META[ck];
       const tags=(r.cells[ck]||[]).map(ing=>
@@ -1827,22 +1873,37 @@ function renderRecipeTable(){
     return`<tr>
       <td style="padding:9px 10px;border:1px solid #e0dfd8;background:#fff;cursor:pointer;vertical-align:middle;" onclick="openRecipeNameModal('${r.id}')">
         <div style="font-size:13px;font-weight:500;color:#1a1a18">${r.name}</div>
+        ${r.cat?`<div style="font-size:10px;color:#aaa;margin-top:2px">${r.cat}</div>`:''}
         ${r.url?`<div style="font-size:10px;color:#639922;margin-top:2px">🔗 链接</div>`:''}
       </td>
       ${cells}
     </tr>`;
   }).join('');
+  // 底部新建行（搜索时不显示）
+  if(!q){
+    tbody.innerHTML+=`<tr>
+      <td colspan="6" style="padding:0;border:1px solid #e0dfd8;background:#fafaf8;">
+        <div style="display:flex;align-items:center;">
+          <input id="new-recipe-input" placeholder="＋ 输入菜谱名称新建…"
+            style="flex:1;border:none;background:transparent;padding:10px 14px;font-size:13px;color:#1a1a18;font-family:var(--font-sans);outline:none;"
+            onkeydown="if(event.key==='Enter')addRecipeRow()"/>
+          <button onclick="addRecipeRow()"
+            style="background:none;border:none;padding:10px 14px;font-size:13px;color:#639922;font-weight:500;cursor:pointer;font-family:var(--font-sans);white-space:nowrap;">添加</button>
+        </div>
+      </td>
+    </tr>`;
+  }
 }
 
 function addRecipeRow(){
   const input=document.getElementById('new-recipe-input');
-  const name=input.value.trim();
-  if(!name) return;
-  const row={id:Date.now().toString(),name,url:'',note:'',cells:{red:[],yellow:[],white:[],green:[],black:[]}};
+  const name=input?.value.trim();
+  if(!name) return input?.focus();
+  const row={id:Date.now().toString(),name,cat:activeCat==='all'?'':activeCat,url:'',note:'',cells:{red:[],yellow:[],white:[],green:[],black:[]}};
   recipeRows.push(row);
-  input.value='';
   renderRecipeTable();
   saveRecipeRows();
+  setTimeout(()=>document.getElementById('new-recipe-input')?.focus(),50);
 }
 
 function openRecipeNameModal(id){
@@ -1854,8 +1915,23 @@ function openRecipeNameModal(id){
   document.getElementById('rnm-url').value=r.url||'';
   document.getElementById('rnm-note').value=r.note||'';
   document.getElementById('rnm-link-btn').style.display=r.url?'':'none';
-  const m=document.getElementById('recipe-name-modal');
-  m.style.display='flex';
+  // 分类选择
+  const catsEl=document.getElementById('rnm-cats');
+  if(catsEl){
+    catsEl.innerHTML=recipeCategories.map(c=>`
+      <div onclick="this.parentNode.querySelectorAll('[data-cat]').forEach(x=>{x.style.background=x.dataset.cat===this.dataset.cat?'#EAF3DE':'#fff';x.style.borderColor=x.dataset.cat===this.dataset.cat?'#639922':'#e0dfd8';x.style.color=x.dataset.cat===this.dataset.cat?'#3B6D11':'#555';});document.getElementById('rnm-selected-cat').value=this.dataset.cat" data-cat="${c}"
+        style="padding:4px 12px;border-radius:99px;font-size:12px;cursor:pointer;border:1.5px solid ${r.cat===c?'#639922':'#e0dfd8'};background:${r.cat===c?'#EAF3DE':'#fff'};color:${r.cat===c?'#3B6D11':'#555'}">${c}</div>
+    `).join('');
+    // 隐藏input存储选中分类
+    if(!document.getElementById('rnm-selected-cat')){
+      const hidden=document.createElement('input');
+      hidden.type='hidden'; hidden.id='rnm-selected-cat'; hidden.value=r.cat||'';
+      catsEl.after(hidden);
+    } else {
+      document.getElementById('rnm-selected-cat').value=r.cat||'';
+    }
+  }
+  document.getElementById('recipe-name-modal').style.display='flex';
 }
 function openRecipeLink(){
   const url=document.getElementById('rnm-url').value.trim();
@@ -1871,6 +1947,7 @@ function saveRecipeName(){
   r.name=document.getElementById('rnm-name').value.trim()||r.name;
   r.url=document.getElementById('rnm-url').value.trim();
   r.note=document.getElementById('rnm-note').value.trim();
+  r.cat=document.getElementById('rnm-selected-cat')?.value||'';
   closeRecipeNameModal();
   renderRecipeTable();
   saveRecipeRows();
@@ -1933,19 +2010,25 @@ function delIngFromCell(name){
 function saveRecipeRows(){
   if(window.db){
     import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js').then(({doc,setDoc})=>{
-      setDoc(doc(window.db,'settings','recipes'),{rows:JSON.stringify(recipeRows),updatedAt:Date.now()},{merge:true}).catch(e=>console.error(e));
+      setDoc(doc(window.db,'settings','recipes'),{rows:JSON.stringify(recipeRows),cats:JSON.stringify(recipeCategories),updatedAt:Date.now()},{merge:true}).catch(e=>console.error(e));
     });
   }
   localStorage.setItem('recipeRows',JSON.stringify(recipeRows));
+  localStorage.setItem('recipeCategories',JSON.stringify(recipeCategories));
 }
 function loadRecipeRows(){
+  const localCats=localStorage.getItem('recipeCategories');
+  if(localCats) try{recipeCategories=JSON.parse(localCats);}catch(e){}
   const local=localStorage.getItem('recipeRows');
   if(local) try{recipeRows=JSON.parse(local);}catch(e){}
+  renderCatBar();
   if(window.db){
     import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js').then(({doc,getDoc})=>{
       getDoc(doc(window.db,'settings','recipes')).then(snap=>{
-        if(snap.exists()&&snap.data().rows){
-          try{recipeRows=JSON.parse(snap.data().rows);}catch(e){}
+        if(snap.exists()){
+          if(snap.data().rows) try{recipeRows=JSON.parse(snap.data().rows);}catch(e){}
+          if(snap.data().cats) try{recipeCategories=JSON.parse(snap.data().cats);}catch(e){}
+          renderCatBar();
           renderRecipeTable();
         }
       }).catch(e=>console.error(e));
