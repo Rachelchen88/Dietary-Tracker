@@ -863,11 +863,13 @@ function renderDiary(){
   const t=dayFoods.reduce((a,f)=>({cal:a.cal+f.cal,pro:a.pro+f.pro,carb:a.carb+f.carb,fat:a.fat+f.fat}),{cal:0,pro:0,carb:0,fat:0});
   document.getElementById('eaten-cal').textContent=Math.round(t.cal);
   document.getElementById('goal-max-label').textContent=` / ${GOAL} 千卡`;
-  document.getElementById('remain-str').textContent=`剩余 ${Math.max(0,GOAL-Math.round(t.cal))}`;
+  const over=t.cal>GOAL;
+  document.getElementById('remain-str').textContent=over?`超出 ${Math.round(t.cal-GOAL)}`:`剩余 ${Math.max(0,GOAL-Math.round(t.cal))}`;
+  document.getElementById('remain-str').style.color=over?'#EF6820':'var(--text2)';
   const pct=Math.min(100,t.cal/GOAL*100);
   const bar=document.getElementById('cal-bar');
   bar.style.width=pct+'%';
-  bar.style.background=pct>100?'var(--red)':'var(--accent)';
+  bar.style.background=over?'#EF6820':'var(--accent)';
   document.getElementById('m-pro').innerHTML=Math.round(t.pro)+'<span class="macro-unit"> g</span>';
   document.getElementById('m-carb').innerHTML=Math.round(t.carb)+'<span class="macro-unit"> g</span>';
   document.getElementById('m-fat').innerHTML=Math.round(t.fat)+'<span class="macro-unit"> g</span>';
