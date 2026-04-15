@@ -1923,22 +1923,29 @@ let rCellId=null;
 function renderCatBar(){
   const bar=document.getElementById('cat-bar');
   if(!bar) return;
-  const all=[
-    {k:'all',l:'全部'},
-    ...recipeCategories.map(c=>({k:c,l:c}))
-  ];
-  bar.innerHTML=all.map(({k,l})=>`
-    <div onclick="setActiveCat('${k}')"
-      style="flex-shrink:0;padding:5px 13px;border-radius:99px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;border:1.5px solid ${activeCat===k?'#639922':'#e0dfd8'};background:${activeCat===k?'#639922':'#fff'};color:${activeCat===k?'#fff':'#555'}">${l}</div>
-  `).join('')+`
+  const allTag=`<div onclick="setActiveCat('all')"
+    style="flex-shrink:0;padding:5px 13px;border-radius:99px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;border:1.5px solid ${activeCat==='all'?'#639922':'#e0dfd8'};background:${activeCat==='all'?'#639922':'#fff'};color:${activeCat==='all'?'#fff':'#555'}">全部</div>`;
+  const catTags=recipeCategories.map(c=>`
+    <div style="flex-shrink:0;display:inline-flex;align-items:center;gap:3px;padding:5px 8px 5px 13px;border-radius:99px;font-size:12px;font-weight:500;white-space:nowrap;border:1.5px solid ${activeCat===c?'#639922':'#e0dfd8'};background:${activeCat===c?'#639922':'#fff'};color:${activeCat===c?'#fff':'#555'}">
+      <span onclick="setActiveCat('${c}')" style="cursor:pointer;">${c}</span>
+      <button onclick="event.stopPropagation();deleteCat('${c}')" style="background:none;border:none;cursor:pointer;color:${activeCat===c?'rgba(255,255,255,0.7)':'#bbb'};font-size:13px;padding:0;line-height:1;margin-left:1px;">×</button>
+    </div>`).join('');
+  bar.innerHTML=allTag+catTags+`
     <div id="cat-add-btn" onclick="showCatInput()"
       style="flex-shrink:0;padding:5px 13px;border-radius:99px;font-size:12px;cursor:pointer;white-space:nowrap;border:1.5px solid #e0dfd8;background:#f5f4f0;color:#aaa">＋ 新分类</div>
-    <div id="cat-add-row" style="display:none;flex-shrink:0;display:none;align-items:center;gap:4px;">
+    <div id="cat-add-row" style="display:none;flex-shrink:0;align-items:center;gap:4px;">
       <input id="cat-add-input" placeholder="分类名…"
         style="border:1.5px solid #639922;border-radius:99px;padding:4px 10px;font-size:12px;color:#1a1a18;font-family:var(--font-sans);outline:none;width:80px;"
         onkeydown="if(event.key==='Enter')saveNewCat();if(event.key==='Escape')hideCatInput()"/>
       <button onclick="saveNewCat()" style="background:#639922;color:#fff;border:none;border-radius:99px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:var(--font-sans);">添加</button>
     </div>`;
+}
+function deleteCat(cat){
+  recipeCategories=recipeCategories.filter(c=>c!==cat);
+  if(activeCat===cat) activeCat='all';
+  renderCatBar();
+  renderRecipeTable();
+  saveRecipeRows();
 }
 function showCatInput(){
   document.getElementById('cat-add-btn').style.display='none';
