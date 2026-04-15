@@ -373,16 +373,29 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
   <div class="goal-card" style="margin:10px 16px 0;">
     <div class="goal-top">
       <div><span class="eaten" id="eaten-cal">0</span><span class="goal-max" id="goal-max-label"> / … 千卡</span></div>
-      <span style="font-size:13px;color:var(--text2)" id="remain-str"></span>
+      <span style="font-size:13px;" id="remain-str"></span>
     </div>
     <div class="bar-track"><div class="bar-fill" id="cal-bar" style="width:0%"></div></div>
   </div>
-  <div class="macro-row" style="margin:8px 16px 0;">
-    <div class="macro-card"><div class="macro-label">蛋白质</div><div class="macro-val" id="m-pro">0<span class="macro-unit"> g</span></div></div>
-    <div class="macro-card"><div class="macro-label">碳水化合物</div><div class="macro-val" id="m-carb">0<span class="macro-unit"> g</span></div></div>
-    <div class="macro-card"><div class="macro-label">脂肪</div><div class="macro-val" id="m-fat">0<span class="macro-unit"> g</span></div></div>
+  <div style="flex:1;overflow:auto;margin:10px 16px 8px;border:1px solid var(--border);border-radius:var(--radius);position:relative;">
+    <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
+      <thead>
+        <tr>
+          <th style="width:56px;padding:7px 4px 7px 8px;font-size:11px;font-weight:500;color:var(--text2);text-align:left;border-bottom:1px solid var(--border);background:var(--surface2);position:sticky;top:0;z-index:2;">餐次</th>
+          <th style="padding:7px 4px;font-size:11px;font-weight:500;text-align:center;border-bottom:1px solid #F7C1C1;background:#FCEBEB;color:#A32D2D;position:sticky;top:0;z-index:2;">🔴红</th>
+          <th style="padding:7px 4px;font-size:11px;font-weight:500;text-align:center;border-bottom:1px solid #FAC775;background:#FAEEDA;color:#854F0B;position:sticky;top:0;z-index:2;">🟡黄</th>
+          <th style="padding:7px 4px;font-size:11px;font-weight:500;text-align:center;border-bottom:1px solid #D3D1C7;background:#F5F4F0;color:#444;position:sticky;top:0;z-index:2;">⚪白</th>
+          <th style="padding:7px 4px;font-size:11px;font-weight:500;text-align:center;border-bottom:1px solid #C0DD97;background:#EAF3DE;color:#3B6D11;position:sticky;top:0;z-index:2;">🟢绿</th>
+          <th style="padding:7px 4px;font-size:11px;font-weight:500;text-align:center;border-bottom:1px solid #5F5E5A;background:#3C3C38;color:#F1EFE8;position:sticky;top:0;z-index:2;">⚫黑</th>
+        </tr>
+      </thead>
+      <tbody id="diary-tbody"></tbody>
+    </table>
+    <div style="padding:9px 14px;background:#EAF3DE;border-top:1px solid #C0DD97;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:12px;color:#3B6D11;">今日合计</span>
+      <strong id="diary-total" style="font-size:14px;font-weight:600;color:#3B6D11;">0 / … 千卡</strong>
+    </div>
   </div>
-  <div class="meal-cards-wrap" id="meal-cards"></div>
 </div>
 
 <!-- PAGE 2: INGREDIENTS -->
@@ -841,12 +854,10 @@ function goToday(){
 }
 
 function renderDiary(){
-  if(window.foods) foods=window.foods; // 同步 Firebase 数据
+  if(window.foods) foods=window.foods;
   const vd=getViewDate();
   const vKey=dateKey(vd);
   const isToday=vKey===todayKey();
-
-  // date switcher labels
   const days=['日','一','二','三','四','五','六'];
   let label;
   if(isToday) label='今天';
@@ -857,104 +868,157 @@ function renderDiary(){
   document.getElementById('ds-today-btn').style.display=isToday?'none':'';
   document.getElementById('today-str').textContent=`${vd.getFullYear()}年${vd.getMonth()+1}月${vd.getDate()}日 周${days[vd.getDay()]}`;
 
-  // filter foods for this date
   const dayFoods=foods.filter(f=>(f.date||todayKey())===vKey);
-
-  const t=dayFoods.reduce((a,f)=>({cal:a.cal+f.cal,pro:a.pro+f.pro,carb:a.carb+f.carb,fat:a.fat+f.fat}),{cal:0,pro:0,carb:0,fat:0});
+  const t=dayFoods.reduce((a,f)=>({cal:a.cal+(f.cal||0),pro:a.pro+(f.pro||0),carb:a.carb+(f.carb||0),fat:a.fat+(f.fat||0)}),{cal:0,pro:0,carb:0,fat:0});
   document.getElementById('eaten-cal').textContent=Math.round(t.cal);
   document.getElementById('goal-max-label').textContent=` / ${GOAL} 千卡`;
   const over=t.cal>GOAL;
   document.getElementById('remain-str').textContent=over?`超出 ${Math.round(t.cal-GOAL)}`:`剩余 ${Math.max(0,GOAL-Math.round(t.cal))}`;
   document.getElementById('remain-str').style.color=over?'#EF6820':'var(--text2)';
   const pct=Math.min(100,t.cal/GOAL*100);
-  const bar=document.getElementById('cal-bar');
-  bar.style.width=pct+'%';
-  bar.style.background=over?'#EF6820':'var(--accent)';
-  document.getElementById('m-pro').innerHTML=Math.round(t.pro)+'<span class="macro-unit"> g</span>';
-  document.getElementById('m-carb').innerHTML=Math.round(t.carb)+'<span class="macro-unit"> g</span>';
-  document.getElementById('m-fat').innerHTML=Math.round(t.fat)+'<span class="macro-unit"> g</span>';
+  document.getElementById('cal-bar').style.width=pct+'%';
+  document.getElementById('cal-bar').style.background=over?'#EF6820':'var(--accent)';
+  const tot=document.getElementById('diary-total');
+  if(tot){tot.textContent=`${Math.round(t.cal)} / ${GOAL} 千卡`;tot.style.color=over?'#EF6820':'#3B6D11';}
 
-  // meal color themes
-  const MEAL_THEMES={
-    '早餐':{bg:'#EAF3DE',border:'#C0DD97',text:'#3B6D11',btnBg:'#639922',btnText:'#fff'},
-    '午餐':{bg:'#EAF3DE',border:'#C0DD97',text:'#3B6D11',btnBg:'#639922',btnText:'#fff'},
-    '晚餐':{bg:'#EAF3DE',border:'#C0DD97',text:'#3B6D11',btnBg:'#639922',btnText:'#fff'},
-    '加餐':{bg:'#EAF3DE',border:'#C0DD97',text:'#3B6D11',btnBg:'#639922',btnText:'#fff'},
-  };
+  const CC=[
+    {k:'red',   bg:'#FCEBEB',bo:'#F7C1C1',tx:'#A32D2D',tg:'#F7C1C1'},
+    {k:'yellow',bg:'#FAEEDA',bo:'#FAC775',tx:'#854F0B',tg:'#FAC775'},
+    {k:'white', bg:'#F5F4F0',bo:'#D3D1C7',tx:'#444441',tg:'#D3D1C7'},
+    {k:'green', bg:'#EAF3DE',bo:'#C0DD97',tx:'#3B6D11',tg:'#C0DD97'},
+    {k:'black', bg:'#3C3C38',bo:'#5F5E5A',tx:'#F1EFE8',tg:'#888780'},
+  ];
+  const MDOT={'早餐':'#EF9F27','午餐':'#639922','晚餐':'#E24B4A','加餐':'#888780'};
 
-  const container=document.getElementById('meal-cards');
-  container.innerHTML='';
+  const tbody=document.getElementById('diary-tbody');
+  if(!tbody) return;
+  let rows='';
   MEALS.forEach(meal=>{
-    const th=MEAL_THEMES[meal];
-    const mFoods=dayFoods.filter(f=>f.meal===meal);
-    const mCal=mFoods.reduce((s,f)=>s+f.cal,0);
-
-    const foodRows=mFoods.map(f=>`
-      <div class="meal-food-row">
-        <div class="meal-food-row-inner">
-          <span class="meal-food-name" onclick="inlineEditFood(this,'${f.id}')">${f.name}</span>
-          ${f.cal>0?`<span class="meal-food-cal" id="cal-${f.id}">${f.cal}千卡</span>`:''}
-          <button class="meal-food-del" onclick="delFood('${f.id}')">×</button>
+    const mf=dayFoods.filter(f=>f.meal===meal);
+    const mCal=Math.round(mf.reduce((s,f)=>s+(f.cal||0),0));
+    // recipe list for this meal
+    const rlist=(typeof recipeRows!=='undefined'&&recipeRows.length)
+      ? recipeRows.map(r=>`<div onclick="addRecipeToMeal('${meal}','${r.id}')" style="padding:5px 10px;font-size:11px;color:#1a1a18;cursor:pointer;border-bottom:0.5px solid #f0ede4;white-space:nowrap;">${r.name}</div>`).join('')
+      : '<div style="padding:5px 10px;font-size:11px;color:#aaa;">暂无菜谱</div>';
+    let cells='';
+    CC.forEach(cc=>{
+      const cf=mf.filter(f=>f.colorKey===cc.k);
+      // suggestions from recipe library
+      const sugg=[];
+      if(typeof recipeRows!=='undefined') recipeRows.forEach(r=>{(r.cells[cc.k]||[]).forEach(s=>{if(!sugg.includes(s))sugg.push(s);});});
+      const pills=cf.map(f=>`<div style="display:flex;align-items:flex-start;gap:2px;margin-bottom:3px;">
+          <span onclick="diaryEdit(this,'${f.id}')" style="font-size:11px;font-weight:500;color:${cc.tx};flex:1;cursor:pointer;line-height:1.3;">${f.name}${f.cal>0?`<br><span style="font-size:10px;opacity:.65;">${f.cal}卡</span>`:''}</span>
+          <button onclick="event.stopPropagation();delFood('${f.id}')" style="background:none;border:none;cursor:pointer;color:${cc.k==='black'?'#666':'#ccc'};font-size:12px;padding:0;line-height:1;flex-shrink:0;">×</button>
+        </div>`).join('');
+      const suggHtml=sugg.length?`<div style="border-top:0.5px solid ${cc.bo};margin-top:3px;padding-top:3px;display:flex;flex-wrap:wrap;gap:2px;">`+sugg.slice(0,5).map(s=>`<button onclick="document.getElementById('din-${meal}-${cc.k}').value='${s}';document.getElementById('dic-${meal}-${cc.k}').focus()" style="font-size:10px;padding:1px 5px;border-radius:3px;background:${cc.tg};color:${cc.tx};border:none;cursor:pointer;">${s}</button>`).join('')+'</div>':'';
+      cells+=`<td style="padding:5px;border:0.5px solid ${cc.bo};background:${cc.bg};vertical-align:top;min-width:46px;cursor:pointer;" onclick="toggleDiaryCell('${meal}','${cc.k}')">
+        ${pills}<div style="text-align:center;color:${cc.bo};font-size:14px;padding:${cf.length?'1':'3'}px 0;">+</div>
+        <div id="dcell-${meal}-${cc.k}" style="display:none;" onclick="event.stopPropagation()">
+          <input id="din-${meal}-${cc.k}" placeholder="食物名…" style="width:100%;border:1px solid ${cc.bo};border-radius:4px;padding:4px 5px;font-size:11px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#fff;box-sizing:border-box;margin-bottom:3px;"
+            onkeydown="if(event.key==='Enter')document.getElementById('dic-${meal}-${cc.k}').focus();if(event.key==='Escape')closeDiaryCell('${meal}','${cc.k}')"/>
+          <div style="display:flex;gap:3px;">
+            <input id="dic-${meal}-${cc.k}" type="number" min="0" placeholder="千卡" style="flex:1;border:1px solid ${cc.bo};border-radius:4px;padding:4px 4px;font-size:11px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#fff;min-width:0;"
+              onkeydown="if(event.key==='Enter')doAddFood('${meal}','${cc.k}');if(event.key==='Escape')closeDiaryCell('${meal}','${cc.k}')"/>
+            <button onclick="doAddFood('${meal}','${cc.k}')" style="background:#639922;color:#fff;border:none;border-radius:4px;padding:4px 6px;font-size:12px;cursor:pointer;flex-shrink:0;">✓</button>
+            <button onclick="closeDiaryCell('${meal}','${cc.k}')" style="background:#f0ede4;color:#888;border:none;border-radius:4px;padding:4px 5px;font-size:11px;cursor:pointer;flex-shrink:0;">✕</button>
+          </div>
+          ${suggHtml}
         </div>
-      </div>`).join('');
-
-    const card=document.createElement('div');
-    card.className='meal-card';
-    card.style.cssText=`background:${th.bg};border-color:${th.border}`;
-    card.innerHTML=`
-      <div class="meal-card-head" style="background:${th.bg}">
-        <span class="meal-card-name" style="color:${th.text}">${meal}</span>
-        <span class="meal-card-kcal" style="color:${th.text}">${mCal>0?Math.round(mCal)+' 千卡':'—'}</span>
-      </div>
-      ${mFoods.length?`<div class="meal-card-body">${foodRows}</div>`:''}
-      <div class="meal-add-row" style="background:${th.bg}">
-        <input class="meal-add-input" id="add-name-${meal}"
-          style="flex:2;background:${th.bg};border-color:${th.border};color:${th.text}"
-          placeholder="食物名…"
-          onfocus="this.style.borderColor='${th.btnBg}'"
-          onblur="this.style.borderColor='${th.border}'"
-          onkeydown="if(event.key==='Enter')document.getElementById('add-cal-${meal}').focus()"/>
-        <input class="meal-add-input" id="add-cal-${meal}" type="number" min="0"
-          style="flex:1;background:${th.bg};border-color:${th.border};color:${th.text}"
-          placeholder="千卡"
-          onfocus="this.style.borderColor='${th.btnBg}'"
-          onblur="this.style.borderColor='${th.border}'"
-          onkeydown="if(event.key==='Enter')quickAddFood('${meal}')"/>
-        <button class="meal-add-btn"
-          style="background:${th.btnBg};color:${th.btnText}"
-          onclick="quickAddFood('${meal}')">+</button>
-      </div>`;
-    container.appendChild(card);
+      </td>`;
+    });
+    rows+=`<tr>
+      <td style="padding:7px 5px 7px 8px;border-bottom:0.5px solid var(--border);vertical-align:top;width:56px;">
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;">
+          <div style="width:7px;height:7px;border-radius:50%;background:${MDOT[meal]};flex-shrink:0;"></div>
+          <span style="font-size:12px;font-weight:500;color:var(--text);">${meal}</span>
+        </div>
+        <div style="font-size:10px;color:${mCal>0?MDOT[meal]:'var(--text3)'};margin-bottom:4px;">${mCal>0?mCal+'卡':'—'}</div>
+        <div style="position:relative;">
+          <button onclick="toggleRecipePick('${meal}')" style="width:100%;font-size:10px;padding:3px 2px;border-radius:4px;background:#EAF3DE;color:#3B6D11;border:1px solid #C0DD97;cursor:pointer;font-family:var(--font-sans);">+菜谱</button>
+          <div id="rp-${meal}" style="display:none;position:absolute;left:0;top:100%;z-index:99;background:#fff;border:1px solid #e0dfd8;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.12);min-width:130px;max-height:180px;overflow-y:auto;">
+            <div style="padding:5px 10px 3px;font-size:10px;color:#aaa;border-bottom:0.5px solid #f0ede4;">选择菜谱</div>
+            ${rlist}
+          </div>
+        </div>
+      </td>
+      ${cells}
+    </tr>`;
   });
+  tbody.innerHTML=rows;
 }
-async function quickAddFood(meal){
-  const nameEl=document.getElementById(`add-name-${meal}`);
-  const calEl=document.getElementById(`add-cal-${meal}`);
-  const name=nameEl.value.trim();
-  if(!name) return nameEl.focus();
-  const cal=Math.round(parseFloat(calEl.value)||0);
-  const entry={
-    meal, name,
-    colorKey:'white', colorDot:'#888780',
-    date:dateKey(getViewDate()),
-    weight:0, cal, pro:0, carb:0, fat:0,
-    createdAt:Date.now(),
-  };
+
+function toggleDiaryCell(meal, ck){
+  const el=document.getElementById(`dcell-${meal}-${ck}`);
+  if(!el) return;
+  const open=el.style.display==='block';
+  document.querySelectorAll('[id^="dcell-"],[id^="rp-"]').forEach(e=>e.style.display='none');
+  if(!open){el.style.display='block';setTimeout(()=>document.getElementById(`din-${meal}-${ck}`)?.focus(),40);}
+}
+function closeDiaryCell(meal,ck){const e=document.getElementById(`dcell-${meal}-${ck}`);if(e)e.style.display='none';}
+function toggleRecipePick(meal){
+  const el=document.getElementById(`rp-${meal}`);if(!el)return;
+  const open=el.style.display==='block';
+  document.querySelectorAll('[id^="dcell-"],[id^="rp-"]').forEach(e=>e.style.display='none');
+  if(!open)el.style.display='block';
+}
+async function doAddFood(meal,ck){
+  const nEl=document.getElementById(`din-${meal}-${ck}`);
+  const cEl=document.getElementById(`dic-${meal}-${ck}`);
+  const name=nEl?.value.trim();
+  if(!name)return nEl?.focus();
+  const cal=Math.round(parseFloat(cEl?.value)||0);
+  const DOTS={red:'#E24B4A',yellow:'#EF9F27',white:'#888780',green:'#639922',black:'#2C2C2A'};
+  const entry={meal,name,colorKey:ck,colorDot:DOTS[ck],date:dateKey(getViewDate()),weight:0,cal,pro:0,carb:0,fat:0,createdAt:Date.now()};
+  foods.push({id:'tmp_'+nid++,...entry});
+  renderDiary();
   if(window.db){
-    try{
-      const {collection,addDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
-      await addDoc(collection(window.db,'foods'),entry);
-    }catch(e){
-      foods.push({id:nid++,...entry});
-      renderDiary();
-    }
-  } else {
-    foods.push({id:nid++,...entry});
-    renderDiary();
+    try{const {collection,addDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');await addDoc(collection(window.db,'foods'),entry);}
+    catch(e){console.error(e);}
   }
-  nameEl.value=''; calEl.value='';
-  nameEl.focus();
 }
+async function addRecipeToMeal(meal,recipeId){
+  document.querySelectorAll('[id^="rp-"]').forEach(e=>e.style.display='none');
+  const r=(typeof recipeRows!=='undefined')&&recipeRows.find(x=>x.id===recipeId);
+  if(!r)return;
+  const DOTS={red:'#E24B4A',yellow:'#EF9F27',white:'#888780',green:'#639922',black:'#2C2C2A'};
+  const entries=[];
+  Object.entries(r.cells).forEach(([ck,ings])=>{
+    (ings||[]).forEach(name=>entries.push({meal,name,colorKey:ck,colorDot:DOTS[ck],date:dateKey(getViewDate()),weight:0,cal:0,pro:0,carb:0,fat:0,createdAt:Date.now()}));
+  });
+  if(!entries.length)return;
+  entries.forEach(e=>foods.push({id:'tmp_'+nid++,...e}));
+  renderDiary();
+  if(window.db){
+    try{const {collection,addDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');for(const e of entries)await addDoc(collection(window.db,'foods'),e);}
+    catch(e){console.error(e);}
+  }
+}
+function diaryEdit(el,id){
+  const f=foods.find(x=>String(x.id)===String(id));
+  if(!f)return;
+  const wrap=document.createElement('div');
+  wrap.style.cssText='margin-top:3px;';
+  wrap.innerHTML=`<input id="de-n-${id}" value="${f.name}" style="width:100%;border:1px solid #C0DD97;border-radius:4px;padding:4px 5px;font-size:11px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#fff;box-sizing:border-box;margin-bottom:3px;"/>
+    <div style="display:flex;gap:3px;">
+      <input id="de-c-${id}" type="number" value="${f.cal||''}" placeholder="千卡" style="flex:1;border:1px solid #C0DD97;border-radius:4px;padding:4px 4px;font-size:11px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#fff;min-width:0;"/>
+      <button onclick="saveDiaryEdit('${id}')" style="background:#639922;color:#fff;border:none;border-radius:4px;padding:4px 6px;font-size:11px;cursor:pointer;">✓</button>
+      <button onclick="renderDiary()" style="background:#f0ede4;color:#888;border:none;border-radius:4px;padding:4px 5px;font-size:11px;cursor:pointer;">✕</button>
+    </div>`;
+  el.parentNode.replaceChild(wrap,el);
+  document.getElementById(`de-n-${id}`)?.focus();
+}
+async function saveDiaryEdit(id){
+  const f=foods.find(x=>String(x.id)===String(id));if(!f)return;
+  const name=document.getElementById(`de-n-${id}`)?.value.trim()||f.name;
+  const cal=Math.round(parseFloat(document.getElementById(`de-c-${id}`)?.value)||0);
+  f.name=name;f.cal=cal;
+  renderDiary();
+  if(window.db){
+    try{const {doc,setDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');await setDoc(doc(window.db,'foods',String(id)),{name,cal},{merge:true});}
+    catch(e){console.error(e);}
+  }
+}
+async function quickAddFood(meal){}
 async function delFood(id){
   if(window.db){
     try{
@@ -1823,24 +1887,27 @@ function renderStats(){
     </div>`;
   }).join('');
 
-  // 五色食材摄入分布（本周实际数量）
+  // 五色食材摄入分布（本周实际千卡）
   const colorCount={red:0,yellow:0,white:0,green:0,black:0};
+  const colorCal={red:0,yellow:0,white:0,green:0,black:0};
+  const weekEnd=new Date(monday); weekEnd.setDate(monday.getDate()+6);
   foods.forEach(f=>{
-    const d=new Date(monday); d.setDate(monday.getDate()+6);
     const fDate=f.date||todayKey();
-    if(fDate>=dateKey(monday)&&fDate<=dateKey(d)&&f.colorKey&&colorCount[f.colorKey]!==undefined){
+    if(fDate>=dateKey(monday)&&fDate<=dateKey(weekEnd)&&f.colorKey&&colorCount[f.colorKey]!==undefined){
       colorCount[f.colorKey]++;
+      colorCal[f.colorKey]+=(f.cal||0);
     }
   });
-  const tot=Object.values(colorCount).reduce((a,b)=>a+b,0)||1;
+  const maxCount=Math.max(...Object.values(colorCount),1);
+  const maxCal=Math.max(...Object.values(colorCal),1);
   document.getElementById('color-dist-rows').innerHTML=[
     {l:'红色',k:'red',c:'#E24B4A'},{l:'黄色',k:'yellow',c:'#EF9F27'},
     {l:'白色',k:'white',c:'#888780'},{l:'绿色',k:'green',c:'#639922'},
     {l:'黑色',k:'black',c:'#2C2C2A'},
   ].map(m=>`<div class="dist-row">
     <span class="dist-label" style="color:${m.c};font-weight:500">${m.l}</span>
-    <div class="dist-track"><div class="dist-fill" style="width:${Math.round(colorCount[m.k]/tot*100)}%;background:${m.c}"></div></div>
-    <span class="dist-count">${colorCount[m.k]}次</span>
+    <div class="dist-track"><div class="dist-fill" style="width:${Math.round(colorCount[m.k]/maxCount*100)}%;background:${m.c}"></div></div>
+    <span class="dist-count">${colorCount[m.k]}次${colorCal[m.k]>0?'·'+Math.round(colorCal[m.k])+'卡':''}</span>
   </div>`).join('');
 }
 
@@ -2071,6 +2138,7 @@ function loadRecipeRows(){
   const local=localStorage.getItem('recipeRows');
   if(local) try{recipeRows=JSON.parse(local);}catch(e){}
   renderCatBar();
+  renderDiary(); // 菜谱加载后刷新饮食记录的+菜谱列表
   if(window.db){
     import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js').then(({doc,getDoc})=>{
       getDoc(doc(window.db,'settings','recipes')).then(snap=>{
@@ -2079,6 +2147,7 @@ function loadRecipeRows(){
           if(snap.data().cats) try{recipeCategories=JSON.parse(snap.data().cats);}catch(e){}
           renderCatBar();
           renderRecipeTable();
+          renderDiary(); // Firebase 加载完后再刷新一次
         }
       }).catch(e=>console.error(e));
     });
