@@ -475,7 +475,7 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
   </div>
 
   <!-- 食材弹窗 -->
-  <div id="recipe-ing-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:300;align-items:flex-end;justify-content:center;">
+  <div id="recipe-ing-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:300;align-items:flex-end;justify-content:center;" onclick="if(event.target===this)closeRecipeIngModal()">
     <div style="background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;">
       <h2 style="font-size:16px;font-weight:500;color:#1a1a18;margin-bottom:4px;" id="rim-title">添加食材</h2>
       <p style="font-size:12px;color:#888;margin-bottom:14px;" id="rim-sub"></p>
@@ -486,7 +486,7 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
           onkeydown="if(event.key==='Enter')addIngToCell()"/>
         <button onclick="addIngToCell()" style="background:#639922;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:14px;cursor:pointer;font-family:var(--font-sans);">添加</button>
       </div>
-      <button onclick="closeRecipeIngModal()" style="width:100%;padding:12px;background:#f5f4f0;border:none;border-radius:8px;font-size:14px;color:#888;cursor:pointer;font-family:var(--font-sans);">完成</button>
+      <button onclick="closeRecipeIngModal()" style="width:100%;padding:12px;background:#639922;border:none;border-radius:8px;font-size:14px;color:#fff;cursor:pointer;font-family:var(--font-sans);font-weight:500;">完成</button>
     </div>
   </div>
 </div>
@@ -1907,7 +1907,7 @@ function renderStats(){
   ].map(m=>`<div class="dist-row">
     <span class="dist-label" style="color:${m.c};font-weight:500">${m.l}</span>
     <div class="dist-track"><div class="dist-fill" style="width:${Math.round(colorCount[m.k]/maxCount*100)}%;background:${m.c}"></div></div>
-    <span class="dist-count">${colorCount[m.k]}次${colorCal[m.k]>0?'·'+Math.round(colorCal[m.k])+'卡':''}</span>
+    <span class="dist-count">${colorCount[m.k]}次</span>
   </div>`).join('');
 }
 
