@@ -505,7 +505,7 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
   <div id="workout-cat-bar" style="padding:0 16px 8px;display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;"></div>
   <div id="workout-list" style="flex:1;overflow-y:auto;padding:0 16px 80px;"></div>
   <div style="padding:8px 16px 12px;flex-shrink:0;display:flex;gap:8px;border-top:1px solid var(--border);background:var(--surface);">
-    <input id="workout-url-input" placeholder="粘贴视频或文章链接…"
+    <input id="workout-url-input" placeholder="输入视频名称…"
       style="flex:1;background:#fff;border:1px solid #e0dfd8;border-radius:8px;padding:9px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;"
       onkeydown="if(event.key==='Enter')openWorkoutAddModal()"/>
     <button onclick="openWorkoutAddModal()"
@@ -518,12 +518,12 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
   <div style="background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;">
     <h2 style="font-size:16px;font-weight:500;color:#1a1a18;margin-bottom:14px;">添加运动视频</h2>
     <div style="margin-bottom:10px;">
-      <label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">链接</label>
-      <input id="wm-url" placeholder="https://…" style="width:100%;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;"/>
-    </div>
-    <div style="margin-bottom:10px;">
       <label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">标题</label>
       <input id="wm-title" placeholder="视频标题…" style="width:100%;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;"/>
+    </div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">链接（可选）</label>
+      <input id="wm-url" placeholder="https://…" style="width:100%;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;"/>
     </div>
     <div style="margin-bottom:14px;">
       <label style="font-size:11px;color:#888;display:block;margin-bottom:6px;">运动部位</label>
@@ -906,9 +906,11 @@ function renderDiary(){
       // suggestions from recipe library
       const sugg=[];
       if(typeof recipeRows!=='undefined') recipeRows.forEach(r=>{(r.cells[cc.k]||[]).forEach(s=>{if(!sugg.includes(s))sugg.push(s);});});
-      const pills=cf.map(f=>`<div style="display:flex;align-items:flex-start;gap:2px;margin-bottom:3px;">
-          <span onclick="diaryEdit(this,'${f.id}')" style="font-size:11px;font-weight:500;color:${cc.tx};flex:1;cursor:pointer;line-height:1.3;">${f.name}${f.cal>0?`<br><span style="font-size:10px;opacity:.65;">${f.cal}卡</span>`:''}</span>
-          <button onclick="event.stopPropagation();delFood('${f.id}')" style="background:none;border:none;cursor:pointer;color:${cc.k==='black'?'#666':'#ccc'};font-size:12px;padding:0;line-height:1;flex-shrink:0;">×</button>
+      const pills=cf.map(f=>`<div style="margin-bottom:3px;">
+          <span onclick="diaryEdit(this,'${f.id}')" style="display:inline-flex;align-items:center;gap:4px;background:${cc.tg};border-radius:99px;padding:3px 8px 3px 8px;cursor:pointer;max-width:100%;">
+            <span style="font-size:11px;font-weight:500;color:${cc.tx};line-height:1.3;">${f.name}${f.cal>0?`<span style="font-size:10px;opacity:.75;margin-left:3px;">${f.cal}卡</span>`:''}</span>
+            <button onclick="event.stopPropagation();delFood('${f.id}')" style="background:none;border:none;cursor:pointer;color:${cc.tx};opacity:.5;font-size:12px;padding:0;line-height:1;flex-shrink:0;">×</button>
+          </span>
         </div>`).join('');
       const suggHtml=sugg.length?`<div style="border-top:0.5px solid ${cc.bo};margin-top:3px;padding-top:3px;display:flex;flex-wrap:wrap;gap:2px;">`+sugg.slice(0,5).map(s=>`<button onclick="document.getElementById('din-${meal}-${cc.k}').value='${s}';document.getElementById('dic-${meal}-${cc.k}').focus()" style="font-size:10px;padding:1px 5px;border-radius:3px;background:${cc.tg};color:${cc.tx};border:none;cursor:pointer;">${s}</button>`).join('')+'</div>':'';
       cells+=`<td style="padding:5px;border:0.5px solid ${cc.bo};background:${cc.bg};vertical-align:top;min-width:46px;cursor:pointer;" onclick="toggleDiaryCell('${meal}','${cc.k}')">
@@ -2601,8 +2603,9 @@ function renderWorkoutVideos(){
 
 function openWorkoutAddModal(){
   const urlInput=document.getElementById('workout-url-input');
-  document.getElementById('wm-url').value=urlInput?.value.trim()||'';
-  document.getElementById('wm-title').value='';
+  const inputVal=urlInput?.value.trim()||'';
+  document.getElementById('wm-title').value=inputVal;
+  document.getElementById('wm-url').value='';
   wmSelectedCat=activeWorkoutCat==='all'?'':activeWorkoutCat;
   const catsEl=document.getElementById('wm-cats');
   if(catsEl) catsEl.innerHTML=workoutCats.map(c=>
@@ -2611,7 +2614,7 @@ function openWorkoutAddModal(){
       style="padding:4px 12px;border-radius:99px;font-size:12px;cursor:pointer;border:1.5px solid ${wmSelectedCat===c?'#639922':'#e0dfd8'};background:${wmSelectedCat===c?'#EAF3DE':'#f5f4f0'};color:${wmSelectedCat===c?'#3B6D11':'#555'}">${c}</div>`
   ).join('');
   document.getElementById('workout-modal').style.display='flex';
-  setTimeout(()=>{ if(!document.getElementById('wm-url').value) document.getElementById('wm-url').focus(); },100);
+  setTimeout(()=>document.getElementById(inputVal?'wm-url':'wm-title').focus(),100);
 }
 function closeWorkoutModal(){
   document.getElementById('workout-modal').style.display='none';
@@ -2620,8 +2623,8 @@ function closeWorkoutModal(){
 async function saveWorkoutVideo(){
   const url=document.getElementById('wm-url').value.trim();
   const title=document.getElementById('wm-title').value.trim();
-  if(!url) return document.getElementById('wm-url').focus();
-  const entry={id:Date.now().toString(),url,title:title||url,cat:wmSelectedCat,createdAt:Date.now()};
+  if(!title) return document.getElementById('wm-title').focus();
+  const entry={id:Date.now().toString(),url,title,cat:wmSelectedCat,createdAt:Date.now()};
   workoutVideos.unshift(entry);
   closeWorkoutModal();
   renderWorkoutVideos();
