@@ -423,13 +423,13 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
     <p>点菜谱名添加链接，点格子添加食材</p>
   </div>
   <div style="padding:10px 16px 8px;">
-    <input id="recipe-search" placeholder="🔍 搜索菜谱…"
+    <input id="recipe-search" placeholder="🔍 搜索菜谱名或食材…"
       style="width:100%;background:#fff;border:1px solid #e0dfd8;border-radius:8px;padding:9px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;"
       oninput="renderRecipeTable()"/>
   </div>
   <!-- 分类标签栏 -->
   <div id="cat-bar" style="padding:0 16px 8px;display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;"></div>
-  <div style="flex:1;overflow:auto;padding:0 16px 20px;">
+  <div style="flex:1;overflow:auto;padding:0 16px 10px;">
     <table id="recipe-table" style="width:100%;border-collapse:collapse;font-size:13px;">
       <thead>
         <tr>
@@ -443,6 +443,14 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
       </thead>
       <tbody id="recipe-tbody"></tbody>
     </table>
+  </div>
+  <!-- 固定底部新建行 -->
+  <div style="flex-shrink:0;border-top:1px solid #e0dfd8;background:#fafaf8;display:flex;align-items:center;padding:0 16px;">
+    <input id="new-recipe-input" placeholder="＋ 输入菜谱名称新建…"
+      style="flex:1;border:none;background:transparent;padding:11px 0;font-size:13px;color:#1a1a18;font-family:var(--font-sans);outline:none;"
+      onkeydown="if(event.key==='Enter')addRecipeRow()"/>
+    <button onclick="addRecipeRow()"
+      style="background:none;border:none;padding:11px 0 11px 12px;font-size:13px;color:#639922;font-weight:500;cursor:pointer;font-family:var(--font-sans);">添加</button>
   </div>
 
   <!-- 菜谱名弹窗 -->
@@ -478,8 +486,13 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
   <div id="recipe-ing-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:300;align-items:flex-end;justify-content:center;" onclick="if(event.target===this)closeRecipeIngModal()">
     <div style="background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;">
       <h2 style="font-size:16px;font-weight:500;color:#1a1a18;margin-bottom:4px;" id="rim-title">添加食材</h2>
-      <p style="font-size:12px;color:#888;margin-bottom:14px;" id="rim-sub"></p>
+      <p style="font-size:12px;color:#888;margin-bottom:10px;" id="rim-sub"></p>
       <div id="rim-tags" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;min-height:32px;"></div>
+      <!-- 已有食材快速选 -->
+      <div id="rim-suggest-wrap" style="margin-bottom:10px;display:none;">
+        <div style="font-size:11px;color:#aaa;margin-bottom:6px;">从其他菜谱快速添加：</div>
+        <div id="rim-suggest" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
+      </div>
       <div style="display:flex;gap:8px;margin-bottom:14px;">
         <input id="rim-input" placeholder="输入食材名…"
           style="flex:1;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;"
@@ -1983,7 +1996,10 @@ function renderRecipeTable(){
   if(!tbody) return;
   const q=(document.getElementById('recipe-search')?.value||'').trim();
   let filtered=activeCat==='all'?recipeRows:recipeRows.filter(r=>r.cat===activeCat);
-  if(q) filtered=filtered.filter(r=>r.name.includes(q));
+  if(q) filtered=filtered.filter(r=>{
+    if(r.name.includes(q)) return true;
+    return Object.values(r.cells||{}).some(ings=>(ings||[]).some(ing=>ing.includes(q)));
+  });
   tbody.innerHTML=filtered.map(r=>{
     const cells=COLOR_KEYS.map(ck=>{
       const cm=COLOR_META[ck];
@@ -2004,20 +2020,6 @@ function renderRecipeTable(){
       ${cells}
     </tr>`;
   }).join('');
-  // 底部新建行（搜索时不显示）
-  if(!q){
-    tbody.innerHTML+=`<tr>
-      <td colspan="6" style="padding:0;border:1px solid #e0dfd8;background:#fafaf8;">
-        <div style="display:flex;align-items:center;">
-          <input id="new-recipe-input" placeholder="＋ 输入菜谱名称新建…"
-            style="flex:1;border:none;background:transparent;padding:10px 14px;font-size:13px;color:#1a1a18;font-family:var(--font-sans);outline:none;"
-            onkeydown="if(event.key==='Enter')addRecipeRow()"/>
-          <button onclick="addRecipeRow()"
-            style="background:none;border:none;padding:10px 14px;font-size:13px;color:#639922;font-weight:500;cursor:pointer;font-family:var(--font-sans);white-space:nowrap;">添加</button>
-        </div>
-      </td>
-    </tr>`;
-  }
 }
 
 function addRecipeRow(){
@@ -2093,9 +2095,40 @@ function openRecipeIngModal(recipeId, colorKey){
   document.getElementById('rim-sub').textContent='点 × 删除食材';
   document.getElementById('rim-input').value='';
   renderIngTags();
-  const m=document.getElementById('recipe-ing-modal');
-  m.style.display='flex';
+
+  // 从其他菜谱收集该颜色的已有食材作为快捷选项
+  const current=r.cells[colorKey]||[];
+  const sugg=[];
+  recipeRows.forEach(other=>{
+    if(other.id===recipeId) return;
+    (other.cells[colorKey]||[]).forEach(ing=>{ if(!sugg.includes(ing)&&!current.includes(ing)) sugg.push(ing); });
+  });
+  const wrap=document.getElementById('rim-suggest-wrap');
+  const suggEl=document.getElementById('rim-suggest');
+  if(sugg.length){
+    suggEl.innerHTML=sugg.slice(0,16).map(ing=>
+      `<button onclick="quickAddIng('${ing}')"
+        style="font-size:12px;padding:4px 10px;border-radius:99px;background:${cm.tagBg};color:${cm.text};border:none;cursor:pointer;font-weight:500;">${ing}</button>`
+    ).join('');
+    wrap.style.display='block';
+  } else {
+    wrap.style.display='none';
+  }
+
+  document.getElementById('recipe-ing-modal').style.display='flex';
   setTimeout(()=>document.getElementById('rim-input').focus(),100);
+}
+function quickAddIng(name){
+  if(!rCellId) return;
+  const r=recipeRows.find(x=>x.id===rCellId.recipeId);
+  if(!r.cells[rCellId.colorKey].includes(name)) r.cells[rCellId.colorKey].push(name);
+  renderIngTags();
+  // 刷新建议列表（移除已添加的）
+  const current=r.cells[rCellId.colorKey]||[];
+  const suggEl=document.getElementById('rim-suggest');
+  if(suggEl) suggEl.querySelectorAll('button').forEach(btn=>{
+    if(current.includes(btn.textContent)) btn.style.opacity='0.3';
+  });
 }
 function closeRecipeIngModal(){
   document.getElementById('recipe-ing-modal').style.display='none';
