@@ -361,40 +361,19 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
 <!-- PAGE 1: DIARY -->
 <div class="page active" id="page-diary">
   <div class="diary-header">
-    <h1>饮食记录</h1>
+    <h1>饮食打卡</h1>
     <div class="date" id="today-str"></div>
   </div>
   <div class="date-switcher">
-    <button class="ds-btn" id="ds-prev" onclick="shiftDay(-1)">‹</button>
-    <span class="ds-label" id="ds-label">今天</span>
-    <button class="ds-today" id="ds-today-btn" onclick="goToday()" style="display:none">回今天</button>
-    <button class="ds-btn" id="ds-next" onclick="shiftDay(1)" disabled>›</button>
+    <button class="ds-btn" onclick="shiftWeek(-1)">‹</button>
+    <span class="ds-label" id="week-label">本周</span>
+    <button class="ds-btn" id="ds-next-week" onclick="shiftWeek(1)" disabled>›</button>
   </div>
-  <div class="goal-card" style="margin:10px 16px 0;">
-    <div class="goal-top">
-      <div><span class="eaten" id="eaten-cal">0</span><span class="goal-max" id="goal-max-label"> / … 千卡</span></div>
-      <span style="font-size:13px;" id="remain-str"></span>
-    </div>
-    <div class="bar-track"><div class="bar-fill" id="cal-bar" style="width:0%"></div></div>
-  </div>
-  <div style="flex:1;overflow:auto;margin:10px 16px 8px;border:1px solid var(--border);border-radius:var(--radius);position:relative;">
-    <table style="width:100%;border-collapse:collapse;table-layout:fixed;">
-      <thead>
-        <tr>
-          <th style="width:56px;padding:7px 4px 7px 8px;font-size:11px;font-weight:500;color:var(--text2);text-align:left;border-bottom:1px solid var(--border);background:var(--surface2);position:sticky;top:0;z-index:2;">餐次</th>
-          <th style="padding:7px 4px;font-size:11px;font-weight:500;text-align:center;border-bottom:1px solid #F7C1C1;background:#FCEBEB;color:#A32D2D;position:sticky;top:0;z-index:2;">🔴红</th>
-          <th style="padding:7px 4px;font-size:11px;font-weight:500;text-align:center;border-bottom:1px solid #FAC775;background:#FAEEDA;color:#854F0B;position:sticky;top:0;z-index:2;">🟡黄</th>
-          <th style="padding:7px 4px;font-size:11px;font-weight:500;text-align:center;border-bottom:1px solid #D3D1C7;background:#F5F4F0;color:#444;position:sticky;top:0;z-index:2;">⚪白</th>
-          <th style="padding:7px 4px;font-size:11px;font-weight:500;text-align:center;border-bottom:1px solid #C0DD97;background:#EAF3DE;color:#3B6D11;position:sticky;top:0;z-index:2;">🟢绿</th>
-          <th style="padding:7px 4px;font-size:11px;font-weight:500;text-align:center;border-bottom:1px solid #5F5E5A;background:#3C3C38;color:#F1EFE8;position:sticky;top:0;z-index:2;">⚫黑</th>
-        </tr>
-      </thead>
-      <tbody id="diary-tbody"></tbody>
+  <div style="flex:1;overflow:auto;margin:8px 0 0;padding:0 16px;">
+    <table id="week-table" style="border-collapse:collapse;font-size:11px;width:100%;table-layout:fixed;">
+      <thead id="week-thead"></thead>
+      <tbody id="week-tbody"></tbody>
     </table>
-    <div style="padding:9px 14px;background:#EAF3DE;border-top:1px solid #C0DD97;display:flex;justify-content:space-between;align-items:center;">
-      <span style="font-size:12px;color:#3B6D11;">今日合计</span>
-      <strong id="diary-total" style="font-size:14px;font-weight:600;color:#3B6D11;">0 / … 千卡</strong>
-    </div>
   </div>
 </div>
 
@@ -434,11 +413,11 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
       <thead>
         <tr>
           <th style="padding:8px 10px;text-align:left;border:1px solid #e0dfd8;background:#f5f4f0;color:#555;font-weight:500;width:100px;min-width:80px;">菜谱</th>
-          <th style="padding:8px 6px;text-align:center;border:1px solid #F7C1C1;background:#FCEBEB;color:#A32D2D;font-weight:500;min-width:60px;">🔴 红</th>
-          <th style="padding:8px 6px;text-align:center;border:1px solid #FAC775;background:#FAEEDA;color:#854F0B;font-weight:500;min-width:60px;">🟡 黄</th>
-          <th style="padding:8px 6px;text-align:center;border:1px solid #D3D1C7;background:#F5F4F0;color:#444;font-weight:500;min-width:60px;">⚪ 白</th>
-          <th style="padding:8px 6px;text-align:center;border:1px solid #C0DD97;background:#EAF3DE;color:#3B6D11;font-weight:500;min-width:60px;">🟢 绿</th>
-          <th style="padding:8px 6px;text-align:center;border:1px solid #5F5E5A;background:#3C3C38;color:#F1EFE8;font-weight:500;min-width:60px;">⚫ 黑</th>
+          <th style="padding:8px 6px;text-align:center;border:1px solid #F7C1C1;background:#FCEBEB;color:#A32D2D;font-weight:500;">🔴 红</th>
+          <th style="padding:8px 6px;text-align:center;border:1px solid #FAC775;background:#FAEEDA;color:#854F0B;font-weight:500;">🟡 黄</th>
+          <th style="padding:8px 6px;text-align:center;border:1px solid #D3D1C7;background:#F5F4F0;color:#444;font-weight:500;">⚪ 白</th>
+          <th style="padding:8px 6px;text-align:center;border:1px solid #C0DD97;background:#EAF3DE;color:#3B6D11;font-weight:500;">🟢 绿</th>
+          <th style="padding:8px 6px;text-align:center;border:1px solid #5F5E5A;background:#3C3C38;color:#F1EFE8;font-weight:500;">⚫ 黑</th>
         </tr>
       </thead>
       <tbody id="recipe-tbody"></tbody>
@@ -453,54 +432,81 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
       style="background:none;border:none;padding:11px 0 11px 12px;font-size:13px;color:#639922;font-weight:500;cursor:pointer;font-family:var(--font-sans);">添加</button>
   </div>
 
-  <!-- 菜谱名弹窗 -->
-  <div id="recipe-name-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:300;align-items:flex-end;justify-content:center;">
-    <div style="background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;">
-      <h2 style="font-size:16px;font-weight:500;color:#1a1a18;margin-bottom:14px;" id="rnm-title">编辑菜谱</h2>
-      <div style="margin-bottom:10px;">
-        <label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">菜谱名称</label>
-        <input id="rnm-name" style="width:100%;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;"/>
-      </div>
-      <div style="margin-bottom:10px;">
-        <label style="font-size:11px;color:#888;display:block;margin-bottom:6px;">分类</label>
-        <div id="rnm-cats" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
-      </div>
-      <div style="margin-bottom:10px;">
-        <label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">链接（视频或文章，可选）</label>
-        <input id="rnm-url" placeholder="https://…" oninput="document.getElementById('rnm-link-btn').style.display=this.value.trim()?'':'none'" style="width:100%;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;"/>
-      </div>
-      <div style="margin-bottom:14px;">
-        <label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">备注（可选）</label>
-        <textarea id="rnm-note" rows="2" placeholder="烹饪心得…" style="width:100%;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;resize:none;"></textarea>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button onclick="closeRecipeNameModal()" style="padding:12px 20px;background:#f5f4f0;border:none;border-radius:8px;font-size:14px;color:#888;cursor:pointer;font-family:var(--font-sans);">取消</button>
-        <button onclick="saveRecipeName()" style="flex:1;padding:12px;background:#639922;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font-sans);">保存</button>
-        <button onclick="openRecipeLink()" id="rnm-link-btn" style="padding:12px 16px;background:#EAF3DE;color:#3B6D11;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-family:var(--font-sans);display:none;">🔗 打开</button>
-        <button onclick="deleteRecipeRow()" style="padding:12px 16px;background:#FCEBEB;color:#A32D2D;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-family:var(--font-sans);">删除</button>
-      </div>
+  </div>
+</div>
+
+<!-- 手动输入弹窗（周打卡用）-->
+<div id="wm-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:400;align-items:flex-end;justify-content:center;" onclick="if(event.target===this)closeWeekManual()">
+  <div style="background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;">
+    <h2 style="font-size:16px;font-weight:500;color:#1a1a18;margin-bottom:14px;" id="wm-modal-title">手动添加食物</h2>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <input id="wm-name" placeholder="食物名称…" style="flex:2;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;"
+        onkeydown="if(event.key==='Enter')document.getElementById('wm-cal').focus()"/>
+      <input id="wm-cal" type="number" min="0" placeholder="千卡" style="flex:1;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;"
+        onkeydown="if(event.key==='Enter')saveWeekManual()"/>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;">
+      <span style="font-size:12px;color:#888;">颜色：</span>
+      <div onclick="setWmColor('red',this)" data-ck="red" class="wm-color-opt" style="width:28px;height:28px;border-radius:50%;background:#E24B4A;cursor:pointer;border:3px solid transparent;"></div>
+      <div onclick="setWmColor('yellow',this)" data-ck="yellow" class="wm-color-opt" style="width:28px;height:28px;border-radius:50%;background:#EF9F27;cursor:pointer;border:3px solid transparent;"></div>
+      <div onclick="setWmColor('white',this)" data-ck="white" class="wm-color-opt" style="width:28px;height:28px;border-radius:50%;background:#888780;cursor:pointer;border:3px solid transparent;"></div>
+      <div onclick="setWmColor('green',this)" data-ck="green" class="wm-color-opt" style="width:28px;height:28px;border-radius:50%;background:#639922;cursor:pointer;border:3px solid transparent;"></div>
+      <div onclick="setWmColor('black',this)" data-ck="black" class="wm-color-opt" style="width:28px;height:28px;border-radius:50%;background:#2C2C2A;cursor:pointer;border:3px solid transparent;"></div>
+    </div>
+    <input type="hidden" id="wm-color" value="white"/>
+    <div style="display:flex;gap:8px;">
+      <button onclick="closeWeekManual()" style="padding:12px 20px;background:#f5f4f0;border:none;border-radius:8px;font-size:14px;color:#888;cursor:pointer;font-family:var(--font-sans);">取消</button>
+      <button onclick="saveWeekManual()" style="flex:1;padding:12px;background:#639922;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font-sans);">添加</button>
     </div>
   </div>
+</div>
 
-  <!-- 食材弹窗 -->
-  <div id="recipe-ing-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:300;align-items:flex-end;justify-content:center;" onclick="if(event.target===this)closeRecipeIngModal()">
-    <div style="background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;">
-      <h2 style="font-size:16px;font-weight:500;color:#1a1a18;margin-bottom:4px;" id="rim-title">添加食材</h2>
-      <p style="font-size:12px;color:#888;margin-bottom:10px;" id="rim-sub"></p>
-      <div id="rim-tags" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;min-height:32px;"></div>
-      <!-- 已有食材快速选 -->
-      <div id="rim-suggest-wrap" style="margin-bottom:10px;display:none;">
-        <div style="font-size:11px;color:#aaa;margin-bottom:6px;">从其他菜谱快速添加：</div>
-        <div id="rim-suggest" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:14px;">
-        <input id="rim-input" placeholder="输入食材名…"
-          style="flex:1;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;"
-          onkeydown="if(event.key==='Enter')addIngToCell()"/>
-        <button onclick="addIngToCell()" style="background:#639922;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:14px;cursor:pointer;font-family:var(--font-sans);">添加</button>
-      </div>
-      <button onclick="closeRecipeIngModal()" style="width:100%;padding:12px;background:#639922;border:none;border-radius:8px;font-size:14px;color:#fff;cursor:pointer;font-family:var(--font-sans);font-weight:500;">完成</button>
+<!-- 菜谱名弹窗（在page外，避免display:none影响fixed定位）-->
+<div id="recipe-name-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:300;align-items:flex-end;justify-content:center;" onclick="if(event.target===this)closeRecipeNameModal()">
+  <div style="background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;">
+    <h2 style="font-size:16px;font-weight:500;color:#1a1a18;margin-bottom:14px;" id="rnm-title">编辑菜谱</h2>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">菜谱名称</label>
+      <input id="rnm-name" style="width:100%;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;"/>
     </div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:11px;color:#888;display:block;margin-bottom:6px;">分类</label>
+      <div id="rnm-cats" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+    </div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">链接（可选）</label>
+      <input id="rnm-url" placeholder="https://…" oninput="document.getElementById('rnm-link-btn').style.display=this.value.trim()?'':'none'" style="width:100%;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;"/>
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">备注（可选）</label>
+      <textarea id="rnm-note" rows="2" placeholder="烹饪心得…" style="width:100%;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;resize:none;"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="closeRecipeNameModal()" style="padding:12px 20px;background:#f5f4f0;border:none;border-radius:8px;font-size:14px;color:#888;cursor:pointer;font-family:var(--font-sans);">取消</button>
+      <button onclick="saveRecipeName()" style="flex:1;padding:12px;background:#639922;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font-sans);">保存</button>
+      <button onclick="openRecipeLink()" id="rnm-link-btn" style="padding:12px 16px;background:#EAF3DE;color:#3B6D11;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-family:var(--font-sans);display:none;">🔗 打开</button>
+      <button onclick="deleteRecipeRow()" style="padding:12px 16px;background:#FCEBEB;color:#A32D2D;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-family:var(--font-sans);">删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 食材弹窗（在page外）-->
+<div id="recipe-ing-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:300;align-items:flex-end;justify-content:center;" onclick="if(event.target===this)closeRecipeIngModal()">
+  <div style="background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;">
+    <h2 style="font-size:16px;font-weight:500;color:#1a1a18;margin-bottom:4px;" id="rim-title">添加食材</h2>
+    <p style="font-size:12px;color:#888;margin-bottom:10px;" id="rim-sub"></p>
+    <div id="rim-tags" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;min-height:32px;"></div>
+    <div id="rim-suggest-wrap" style="margin-bottom:10px;display:none;">
+      <div style="font-size:11px;color:#aaa;margin-bottom:6px;">从其他菜谱快速添加：</div>
+      <div id="rim-suggest" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <input id="rim-input" placeholder="输入食材名…"
+        style="flex:1;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;"
+        onkeydown="if(event.key==='Enter')addIngToCell()"/>
+      <button onclick="addIngToCell()" style="background:#639922;color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:14px;cursor:pointer;font-family:var(--font-sans);">添加</button>
+    </div>
+    <button onclick="closeRecipeIngModal()" style="width:100%;padding:12px;background:#639922;border:none;border-radius:8px;font-size:14px;color:#fff;cursor:pointer;font-family:var(--font-sans);font-weight:500;">完成</button>
   </div>
 </div>
 
@@ -779,8 +785,13 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
 </div>
 
 <script>
+// 安全的 localStorage 封装（Claude 沙箱里被禁用）
+const ls={
+  get(k){try{return ls.get(k);}catch(e){return null;}},
+  set(k,v){try{ls.set(k,v);}catch(e){}},
+};
 // ── DATA ──────────────────────────────────────────
-let GOAL=parseInt(localStorage.getItem('daily_goal'))||2000; // 从本地缓存恢复，默认2000
+let GOAL=parseInt(ls.get('daily_goal'))||2000; // 从本地缓存恢复，默认2000
 const MEALS=['早餐','午餐','晚餐','加餐'];
 const MCOLS={'早餐':'#EF9F27','午餐':'#639922','晚餐':'#E24B4A','加餐':'#888780'};
 const WDAYS=['周一','周二','周三','周四','周五','周六','周日'];
@@ -842,148 +853,182 @@ const COLOR_PROPS={
   black: {bg:'#3C3C38',text:'#F1EFE8',dot:'#2C2C2A'},
 };
 
-// 当前查看的日期（偏移天数，0=今天，-1=昨天…）
-let dayOffset=0;
+// 一周打卡视图
+let weekOffset=0;
+let dayOffset=0; // 兼容旧代码
 
-function getViewDate(){
-  const d=new Date();
-  d.setDate(d.getDate()+dayOffset);
-  return d;
+function getWeekMonday(offset){
+  const today=new Date();
+  const dow=today.getDay();
+  const monday=new Date(today);
+  monday.setDate(today.getDate()-(dow===0?6:dow-1)+offset*7);
+  monday.setHours(0,0,0,0);
+  return monday;
 }
 function dateKey(d){
-  const dt=d||getViewDate();
+  const dt=d||new Date();
   return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
 }
 function todayKey(){ return dateKey(new Date()); }
-
-function shiftDay(delta){
-  dayOffset+=delta;
-  if(dayOffset>0) dayOffset=0;
-  renderDiary();
-}
-function goToday(){
-  dayOffset=0;
-  renderDiary();
-}
+function getViewDate(){ return new Date(); }
+function shiftWeek(delta){ weekOffset+=delta; if(weekOffset>0)weekOffset=0; renderDiary(); }
+function shiftDay(){ }
+function goToday(){ weekOffset=0; renderDiary(); }
 
 function renderDiary(){
   if(window.foods) foods=window.foods;
-  const vd=getViewDate();
-  const vKey=dateKey(vd);
-  const isToday=vKey===todayKey();
-  const days=['日','一','二','三','四','五','六'];
-  let label;
-  if(isToday) label='今天';
-  else if(dayOffset===-1) label='昨天';
-  else label=`${vd.getMonth()+1}月${vd.getDate()}日 周${days[vd.getDay()]}`;
-  document.getElementById('ds-label').textContent=label;
-  document.getElementById('ds-next').disabled=isToday;
-  document.getElementById('ds-today-btn').style.display=isToday?'none':'';
-  document.getElementById('today-str').textContent=`${vd.getFullYear()}年${vd.getMonth()+1}月${vd.getDate()}日 周${days[vd.getDay()]}`;
+  const monday=getWeekMonday(weekOffset);
+  const tKey=todayKey();
+  const DAYS_CN=['周一','周二','周三','周四','周五','周六','周日'];
 
-  const dayFoods=foods.filter(f=>(f.date||todayKey())===vKey);
-  const t=dayFoods.reduce((a,f)=>({cal:a.cal+(f.cal||0),pro:a.pro+(f.pro||0),carb:a.carb+(f.carb||0),fat:a.fat+(f.fat||0)}),{cal:0,pro:0,carb:0,fat:0});
-  document.getElementById('eaten-cal').textContent=Math.round(t.cal);
-  document.getElementById('goal-max-label').textContent=` / ${GOAL} 千卡`;
-  const over=t.cal>GOAL;
-  document.getElementById('remain-str').textContent=over?`超出 ${Math.round(t.cal-GOAL)}`:`剩余 ${Math.max(0,GOAL-Math.round(t.cal))}`;
-  document.getElementById('remain-str').style.color=over?'#EF6820':'var(--text2)';
-  const pct=Math.min(100,t.cal/GOAL*100);
-  document.getElementById('cal-bar').style.width=pct+'%';
-  document.getElementById('cal-bar').style.background=over?'#EF6820':'var(--accent)';
-  const tot=document.getElementById('diary-total');
-  if(tot){tot.textContent=`${Math.round(t.cal)} / ${GOAL} 千卡`;tot.style.color=over?'#EF6820':'#3B6D11';}
+  const weekDates=[];
+  for(let i=0;i<7;i++){
+    const d=new Date(monday);
+    d.setDate(monday.getDate()+i);
+    weekDates.push(d);
+  }
 
-  const CC=[
-    {k:'red',   bg:'#FCEBEB',bo:'#F7C1C1',tx:'#A32D2D',tg:'#F7C1C1'},
-    {k:'yellow',bg:'#FAEEDA',bo:'#FAC775',tx:'#854F0B',tg:'#FAC775'},
-    {k:'white', bg:'#F5F4F0',bo:'#D3D1C7',tx:'#444441',tg:'#D3D1C7'},
-    {k:'green', bg:'#EAF3DE',bo:'#C0DD97',tx:'#3B6D11',tg:'#C0DD97'},
-    {k:'black', bg:'#3C3C38',bo:'#5F5E5A',tx:'#F1EFE8',tg:'#888780'},
-  ];
-  const MDOT={'早餐':'#EF9F27','午餐':'#639922','晚餐':'#E24B4A','加餐':'#888780'};
+  const m=weekDates[0], e=weekDates[6];
+  document.getElementById('week-label').textContent=`${m.getMonth()+1}月${m.getDate()}日 — ${e.getMonth()+1}月${e.getDate()}日`;
+  document.getElementById('ds-next-week').disabled=weekOffset===0;
+  const now=new Date();
+  document.getElementById('today-str').textContent=`${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 周${'日一二三四五六'[now.getDay()]}`;
 
-  const tbody=document.getElementById('diary-tbody');
-  if(!tbody) return;
-  let rows='';
-  MEALS.forEach(meal=>{
-    const mf=dayFoods.filter(f=>f.meal===meal);
-    const mCal=Math.round(mf.reduce((s,f)=>s+(f.cal||0),0));
-    // recipe list for this meal
-    const rlist=(typeof recipeRows!=='undefined'&&recipeRows.length)
-      ? recipeRows.map(r=>`<div onclick="addRecipeToMeal('${meal}','${r.id}')" style="padding:5px 10px;font-size:11px;color:#1a1a18;cursor:pointer;border-bottom:0.5px solid #f0ede4;white-space:nowrap;">${r.name}</div>`).join('')
-      : '<div style="padding:5px 10px;font-size:11px;color:#aaa;">暂无菜谱</div>';
-    let cells='';
-    CC.forEach(cc=>{
-      const cf=mf.filter(f=>f.colorKey===cc.k);
-      // suggestions from recipe library
-      const sugg=[];
-      if(typeof recipeRows!=='undefined') recipeRows.forEach(r=>{(r.cells[cc.k]||[]).forEach(s=>{if(!sugg.includes(s))sugg.push(s);});});
-      const pills=cf.map(f=>`<div style="margin-bottom:3px;">
-          <span onclick="diaryEdit(this,'${f.id}')" style="display:inline-flex;align-items:center;gap:4px;background:${cc.tg};border-radius:99px;padding:3px 8px 3px 8px;cursor:pointer;max-width:100%;">
-            <span style="font-size:11px;font-weight:500;color:${cc.tx};line-height:1.3;">${f.name}${f.cal>0?`<span style="font-size:10px;opacity:.75;margin-left:3px;">${f.cal}卡</span>`:''}</span>
-            <button onclick="event.stopPropagation();delFood('${f.id}')" style="background:none;border:none;cursor:pointer;color:${cc.tx};opacity:.5;font-size:12px;padding:0;line-height:1;flex-shrink:0;">×</button>
-          </span>
-        </div>`).join('');
-      const suggHtml=sugg.length?`<div style="border-top:0.5px solid ${cc.bo};margin-top:3px;padding-top:3px;display:flex;flex-wrap:wrap;gap:2px;">`+sugg.slice(0,5).map(s=>`<button onclick="document.getElementById('din-${meal}-${cc.k}').value='${s}';document.getElementById('dic-${meal}-${cc.k}').focus()" style="font-size:10px;padding:1px 5px;border-radius:3px;background:${cc.tg};color:${cc.tx};border:none;cursor:pointer;">${s}</button>`).join('')+'</div>':'';
-      cells+=`<td style="padding:5px;border:0.5px solid ${cc.bo};background:${cc.bg};vertical-align:top;min-width:46px;cursor:pointer;" onclick="toggleDiaryCell('${meal}','${cc.k}')">
-        ${pills}<div style="text-align:center;color:${cc.bo};font-size:14px;padding:${cf.length?'1':'3'}px 0;">+</div>
-        <div id="dcell-${meal}-${cc.k}" style="display:none;" onclick="event.stopPropagation()">
-          <input id="din-${meal}-${cc.k}" placeholder="食物名…" style="width:100%;border:1px solid ${cc.bo};border-radius:4px;padding:4px 5px;font-size:11px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#fff;box-sizing:border-box;margin-bottom:3px;"
-            onkeydown="if(event.key==='Enter')document.getElementById('dic-${meal}-${cc.k}').focus();if(event.key==='Escape')closeDiaryCell('${meal}','${cc.k}')"/>
-          <div style="display:flex;gap:3px;">
-            <input id="dic-${meal}-${cc.k}" type="number" min="0" placeholder="千卡" style="flex:1;border:1px solid ${cc.bo};border-radius:4px;padding:4px 4px;font-size:11px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#fff;min-width:0;"
-              onkeydown="if(event.key==='Enter')doAddFood('${meal}','${cc.k}');if(event.key==='Escape')closeDiaryCell('${meal}','${cc.k}')"/>
-            <button onclick="doAddFood('${meal}','${cc.k}')" style="background:#639922;color:#fff;border:none;border-radius:4px;padding:4px 6px;font-size:12px;cursor:pointer;flex-shrink:0;">✓</button>
-            <button onclick="closeDiaryCell('${meal}','${cc.k}')" style="background:#f0ede4;color:#888;border:none;border-radius:4px;padding:4px 5px;font-size:11px;cursor:pointer;flex-shrink:0;">✕</button>
-          </div>
-          ${suggHtml}
-        </div>
+  const thead=document.getElementById('week-thead');
+  thead.innerHTML=`<tr>
+    <th style="width:32px;border:0.5px solid var(--border);background:var(--surface2);"></th>
+    ${weekDates.map((d,i)=>{
+      const it=dateKey(d)===tKey;
+      return`<th style="padding:5px 3px;text-align:center;border:0.5px solid ${it?'#C0DD97':'var(--border)'};background:${it?'#EAF3DE':'var(--surface2)'};color:${it?'#3B6D11':'var(--text2)'};font-size:11px;font-weight:${it?600:500};">${DAYS_CN[i]}<br><span style="font-size:10px;font-weight:400;">${d.getDate()}</span></th>`;
+    }).join('')}
+  </tr>`;
+
+  const CBG={red:'#F7C1C1',yellow:'#FAC775',white:'#D3D1C7',green:'#C0DD97',black:'#888780'};
+  const CTX={red:'#A32D2D',yellow:'#854F0B',white:'#444441',green:'#3B6D11',black:'#F1EFE8'};
+  const DOTS={red:'#E24B4A',yellow:'#EF9F27',white:'#888780',green:'#639922',black:'#2C2C2A'};
+
+  // 热量行
+  const calCells=weekDates.map(d=>{
+    const dk=dateKey(d); const it=dk===tKey;
+    const cal=Math.round(foods.filter(f=>(f.date||tKey)===dk).reduce((s,f)=>s+(f.cal||0),0));
+    const over=cal>GOAL; const pct=Math.min(100,cal/GOAL*100);
+    return`<td style="padding:4px 3px;border:0.5px solid ${it?'#C0DD97':'var(--border)'};background:${it?'#f9fdf5':'#fff'};text-align:center;">
+      ${cal?`<div style="font-size:11px;font-weight:600;color:${over?'#EF6820':'#639922'};">${cal}</div>
+      <div style="height:3px;background:#e0dfd8;border-radius:2px;margin:2px 0;"><div style="height:100%;border-radius:2px;background:${over?'#EF6820':'#639922'};width:${pct}%;"></div></div>
+      <div style="font-size:9px;color:${over?'#EF6820':'var(--text3)'};">${over?'超'+(cal-GOAL):'/ '+GOAL}</div>`
+      :`<span style="font-size:10px;color:var(--text3);">—</span>`}
+    </td>`;
+  }).join('');
+
+  // 餐次行
+  const mealRows=MEALS.map(meal=>{
+    const cells=weekDates.map(d=>{
+      const dk=dateKey(d); const it=dk===tKey;
+      const mf=foods.filter(f=>(f.date||tKey)===dk&&f.meal===meal);
+      const CBG={red:'#F7C1C1',yellow:'#FAC775',white:'#D3D1C7',green:'#C0DD97',black:'#888780'};
+      const CTX={red:'#A32D2D',yellow:'#854F0B',white:'#444441',green:'#3B6D11',black:'#F1EFE8'};
+      const pills=mf.map(f=>{
+        const bg=CBG[f.colorKey]||'#F4C0D1';
+        const tx=CTX[f.colorKey]||'#72243E';
+        return`<div style="display:inline-flex;align-items:center;gap:2px;background:${bg};border-radius:99px;padding:2px 5px 2px 7px;margin:1px;opacity:${f.checked?1:0.5};">
+          <span onclick="event.stopPropagation();editFoodCal('${f.id}')" style="font-size:10px;font-weight:500;color:${tx};cursor:pointer;">${f.name}<span style="font-size:9px;opacity:.7;margin-left:2px;">${f.cal>0?f.cal+'卡':'＋卡'}</span></span>
+          <button onclick="event.stopPropagation();toggleCheck('${f.id}')" style="background:none;border:none;cursor:pointer;font-size:11px;color:${tx};padding:0;line-height:1;">${f.checked?'✓':'○'}</button>
+          <button onclick="event.stopPropagation();delFood('${f.id}')" style="background:none;border:none;cursor:pointer;font-size:10px;color:${tx};opacity:.5;padding:0;line-height:1;">×</button>
+        </div>`;
+      }).join('');
+      return`<td style="padding:4px 3px;border:0.5px solid ${it?'#C0DD97':'var(--border)'};background:${it?'#f9fdf5':'#fff'};vertical-align:top;cursor:pointer;position:relative;" onclick="toggleWeekCell('${dk}','${meal}')">
+        ${pills}<div style="text-align:center;color:#ccc;font-size:12px;padding:${mf.length?1:3}px 0;">+</div>
+        <div id="wc-${dk}-${meal}" style="display:none;position:absolute;left:0;top:100%;z-index:99;background:#fff;border:1px solid #e0dfd8;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.1);min-width:130px;max-height:200px;overflow-y:auto;" onclick="event.stopPropagation()"></div>
       </td>`;
-    });
-    rows+=`<tr>
-      <td style="padding:7px 5px 7px 8px;border-bottom:0.5px solid var(--border);vertical-align:top;width:56px;">
-        <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;">
-          <div style="width:7px;height:7px;border-radius:50%;background:${MDOT[meal]};flex-shrink:0;"></div>
-          <span style="font-size:12px;font-weight:500;color:var(--text);">${meal}</span>
-        </div>
-        <div style="font-size:10px;color:${mCal>0?MDOT[meal]:'var(--text3)'};margin-bottom:4px;">${mCal>0?mCal+'卡':'—'}</div>
-        <div style="position:relative;">
-          <button onclick="toggleRecipePick('${meal}')" style="width:100%;font-size:10px;padding:3px 2px;border-radius:4px;background:#EAF3DE;color:#3B6D11;border:1px solid #C0DD97;cursor:pointer;font-family:var(--font-sans);">+菜谱</button>
-          <div id="rp-${meal}" style="display:none;position:absolute;left:0;top:100%;z-index:99;background:#fff;border:1px solid #e0dfd8;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.12);min-width:130px;max-height:180px;overflow-y:auto;">
-            <div style="padding:5px 10px 3px;font-size:10px;color:#aaa;border-bottom:0.5px solid #f0ede4;">选择菜谱</div>
-            ${rlist}
-          </div>
-        </div>
-      </td>
-      ${cells}
-    </tr>`;
-  });
-  tbody.innerHTML=rows;
+    }).join('');
+    return`<tr><td style="padding:5px 3px;border:0.5px solid var(--border);background:var(--surface2);font-size:11px;font-weight:500;color:var(--text2);text-align:center;white-space:nowrap;">${meal}</td>${cells}</tr>`;
+  }).join('');
+
+  const tbody=document.getElementById('week-tbody');
+  if(tbody) tbody.innerHTML=calCells.length?`<tr><td style="padding:4px 3px;border:0.5px solid var(--border);background:var(--surface2);font-size:10px;color:var(--text3);text-align:center;">热量</td>${calCells}</tr>${mealRows}`:mealRows;
 }
 
-function toggleDiaryCell(meal, ck){
-  const el=document.getElementById(`dcell-${meal}-${ck}`);
+function toggleWeekCell(dk, meal){
+  const el=document.getElementById(`wc-${dk}-${meal}`);
   if(!el) return;
   const open=el.style.display==='block';
-  document.querySelectorAll('[id^="dcell-"],[id^="rp-"]').forEach(e=>e.style.display='none');
-  if(!open){el.style.display='block';setTimeout(()=>document.getElementById(`din-${meal}-${ck}`)?.focus(),40);}
+  document.querySelectorAll('[id^="wc-"]').forEach(e=>e.style.display='none');
+  if(!open){
+    // 每次打开时动态生成菜谱列表
+    const rlist=(typeof recipeRows!=='undefined'&&recipeRows.length)
+      ? recipeRows.map(r=>`<div onclick="event.stopPropagation();addWeekRecipe('${dk}','${meal}','${r.id}')" style="padding:5px 10px;font-size:11px;color:#1a1a18;cursor:pointer;border-bottom:0.5px solid #f0ede4;white-space:nowrap;">${r.name}</div>`).join('')
+      : `<div style="padding:5px 10px;font-size:11px;color:#aaa;">暂无菜谱</div>`;
+    el.innerHTML=`<div style="padding:5px 10px 3px;font-size:10px;color:#aaa;border-bottom:0.5px solid #f0ede4;">选菜谱</div>
+      ${rlist}
+      <div onclick="openWeekManual('${dk}','${meal}')" style="padding:5px 10px;font-size:11px;color:#639922;cursor:pointer;font-weight:500;border-top:0.5px solid #f0ede4;">＋ 手动输入</div>`;
+    el.style.display='block';
+  }
 }
-function closeDiaryCell(meal,ck){const e=document.getElementById(`dcell-${meal}-${ck}`);if(e)e.style.display='none';}
-function toggleRecipePick(meal){
-  const el=document.getElementById(`rp-${meal}`);if(!el)return;
-  const open=el.style.display==='block';
-  document.querySelectorAll('[id^="dcell-"],[id^="rp-"]').forEach(e=>e.style.display='none');
-  if(!open)el.style.display='block';
+let wManualDk='', wManualMeal='';
+function openWeekManual(dk, meal){
+  document.querySelectorAll('[id^="wc-"]').forEach(e=>e.style.display='none');
+  wManualDk=dk; wManualMeal=meal;
+  document.getElementById('wm-modal').style.display='flex';
+  setTimeout(()=>document.getElementById('wm-name').focus(),50);
 }
-async function doAddFood(meal,ck){
-  const nEl=document.getElementById(`din-${meal}-${ck}`);
-  const cEl=document.getElementById(`dic-${meal}-${ck}`);
-  const name=nEl?.value.trim();
-  if(!name)return nEl?.focus();
-  const cal=Math.round(parseFloat(cEl?.value)||0);
+function closeWeekManual(){
+  document.getElementById('wm-modal').style.display='none';
+  document.getElementById('wm-name').disabled=false;
+  document.getElementById('wm-color').disabled=false;
+  document.getElementById('wm-name').value='';
+  document.getElementById('wm-cal').value='';
+  document.getElementById('wm-color').value='white';
+  document.querySelectorAll('.wm-color-opt').forEach(d=>d.style.border='3px solid transparent');
+}
+async function saveWeekManual(){
+  if(wManualDk==='__edit__'){
+    const f=foods.find(x=>String(x.id)===String(wManualMeal));
+    if(f){
+      f.cal=Math.round(parseFloat(document.getElementById('wm-cal').value)||0);
+      renderDiary();
+      if(window.db){
+        import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js').then(({doc,setDoc})=>{
+          setDoc(doc(window.db,'foods',String(wManualMeal)),{cal:f.cal},{merge:true}).catch(e=>console.error(e));
+        });
+      }
+    }
+    closeWeekManual(); return;
+  }
+  const name=document.getElementById('wm-name').value.trim();
+  if(!name) return document.getElementById('wm-name').focus();
+  const cal=Math.round(parseFloat(document.getElementById('wm-cal').value)||0);
+  const ck=document.getElementById('wm-color').value||'white';
   const DOTS={red:'#E24B4A',yellow:'#EF9F27',white:'#888780',green:'#639922',black:'#2C2C2A'};
-  const entry={meal,name,colorKey:ck,colorDot:DOTS[ck],date:dateKey(getViewDate()),weight:0,cal,pro:0,carb:0,fat:0,createdAt:Date.now()};
+  const entry={meal:wManualMeal,name,colorKey:ck,colorDot:DOTS[ck],date:wManualDk,weight:0,cal,pro:0,carb:0,fat:0,checked:false,createdAt:Date.now()};
+  foods.push({id:'tmp_'+nid++,...entry});
+  renderDiary(); closeWeekManual();
+  if(window.db){
+    try{const {collection,addDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');await addDoc(collection(window.db,'foods'),entry);}
+    catch(e){console.error(e);}
+  }
+}
+function setWmColor(ck, el){
+  document.getElementById('wm-color').value=ck;
+  document.querySelectorAll('.wm-color-opt').forEach(d=>d.style.border='3px solid transparent');
+  el.style.border='3px solid #1a1a18';
+}
+function editFoodCal(id){
+  const f=foods.find(x=>String(x.id)===String(id));
+  if(!f) return;
+  document.getElementById('wm-name').value=f.name;
+  document.getElementById('wm-name').disabled=true;
+  document.getElementById('wm-cal').value=f.cal||'';
+  document.getElementById('wm-color').value=f.colorKey||'white';
+  document.getElementById('wm-color').disabled=true;
+  wManualDk='__edit__'; wManualMeal=id;
+  document.getElementById('wm-modal').style.display='flex';
+  setTimeout(()=>document.getElementById('wm-cal').focus(),50);
+}
+async function addWeekRecipe(dk, meal, recipeId){
+  document.querySelectorAll('[id^="wc-"]').forEach(e=>e.style.display='none');
+  const r=(typeof recipeRows!=='undefined')&&recipeRows.find(x=>x.id===recipeId);
+  if(!r) return;
+  const entry={meal,name:r.name,colorKey:'white',colorDot:'#888780',date:dk,weight:0,cal:0,pro:0,carb:0,fat:0,checked:false,createdAt:Date.now()};
   foods.push({id:'tmp_'+nid++,...entry});
   renderDiary();
   if(window.db){
@@ -991,49 +1036,27 @@ async function doAddFood(meal,ck){
     catch(e){console.error(e);}
   }
 }
-async function addRecipeToMeal(meal,recipeId){
-  document.querySelectorAll('[id^="rp-"]').forEach(e=>e.style.display='none');
-  const r=(typeof recipeRows!=='undefined')&&recipeRows.find(x=>x.id===recipeId);
-  if(!r)return;
-  const DOTS={red:'#E24B4A',yellow:'#EF9F27',white:'#888780',green:'#639922',black:'#2C2C2A'};
-  const entries=[];
-  Object.entries(r.cells).forEach(([ck,ings])=>{
-    (ings||[]).forEach(name=>entries.push({meal,name,colorKey:ck,colorDot:DOTS[ck],date:dateKey(getViewDate()),weight:0,cal:0,pro:0,carb:0,fat:0,createdAt:Date.now()}));
-  });
-  if(!entries.length)return;
-  entries.forEach(e=>foods.push({id:'tmp_'+nid++,...e}));
-  renderDiary();
-  if(window.db){
-    try{const {collection,addDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');for(const e of entries)await addDoc(collection(window.db,'foods'),e);}
-    catch(e){console.error(e);}
-  }
-}
-function diaryEdit(el,id){
+function toggleCheck(id){
   const f=foods.find(x=>String(x.id)===String(id));
-  if(!f)return;
-  const wrap=document.createElement('div');
-  wrap.style.cssText='margin-top:3px;';
-  wrap.innerHTML=`<input id="de-n-${id}" value="${f.name}" style="width:100%;border:1px solid #C0DD97;border-radius:4px;padding:4px 5px;font-size:11px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#fff;box-sizing:border-box;margin-bottom:3px;"/>
-    <div style="display:flex;gap:3px;">
-      <input id="de-c-${id}" type="number" value="${f.cal||''}" placeholder="千卡" style="flex:1;border:1px solid #C0DD97;border-radius:4px;padding:4px 4px;font-size:11px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#fff;min-width:0;"/>
-      <button onclick="saveDiaryEdit('${id}')" style="background:#639922;color:#fff;border:none;border-radius:4px;padding:4px 6px;font-size:11px;cursor:pointer;">✓</button>
-      <button onclick="renderDiary()" style="background:#f0ede4;color:#888;border:none;border-radius:4px;padding:4px 5px;font-size:11px;cursor:pointer;">✕</button>
-    </div>`;
-  el.parentNode.replaceChild(wrap,el);
-  document.getElementById(`de-n-${id}`)?.focus();
-}
-async function saveDiaryEdit(id){
-  const f=foods.find(x=>String(x.id)===String(id));if(!f)return;
-  const name=document.getElementById(`de-n-${id}`)?.value.trim()||f.name;
-  const cal=Math.round(parseFloat(document.getElementById(`de-c-${id}`)?.value)||0);
-  f.name=name;f.cal=cal;
+  if(!f) return;
+  f.checked=!f.checked;
   renderDiary();
   if(window.db){
-    try{const {doc,setDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');await setDoc(doc(window.db,'foods',String(id)),{name,cal},{merge:true});}
-    catch(e){console.error(e);}
+    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js').then(({doc,setDoc})=>{
+      setDoc(doc(window.db,'foods',String(id)),{checked:f.checked},{merge:true}).catch(e=>console.error(e));
+    });
   }
 }
 async function quickAddFood(meal){}
+function toggleDiaryCell(){}
+function closeDiaryCell(){}
+function toggleRecipePick(){}
+function doAddFood(){}
+function addRecipeToMeal(){}
+function diaryEdit(){}
+function saveDiaryEdit(){}
+
+
 async function delFood(id){
   if(window.db){
     try{
@@ -2004,11 +2027,12 @@ function renderRecipeTable(){
     const cells=COLOR_KEYS.map(ck=>{
       const cm=COLOR_META[ck];
       const tags=(r.cells[ck]||[]).map(ing=>
-        `<span style="display:inline-block;font-size:11px;padding:2px 7px;border-radius:4px;background:${cm.tagBg};color:${cm.text};margin:2px 2px 0 0;font-weight:500">${ing}</span>`
+        `<span style="display:inline-block;font-size:11px;padding:2px 7px;border-radius:4px;background:${cm.tagBg};color:${cm.text};margin:2px 2px 0 0;font-weight:500;white-space:nowrap;">${ing}</span>`
       ).join('');
+      const hasItems=(r.cells[ck]||[]).length>0;
       return`<td style="padding:6px;border:1px solid ${cm.border};background:${cm.bg};cursor:pointer;vertical-align:top;" onclick="openRecipeIngModal('${r.id}','${ck}')">
-        ${tags}
-        <div style="color:#ccc;font-size:16px;text-align:center;padding:${(r.cells[ck]||[]).length?'2':'4'}px 0">+</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0;">${tags}</div>
+        <div style="color:#ccc;font-size:14px;text-align:center;padding:${hasItems?'3':'4'}px 0">+</div>
       </td>`;
     }).join('');
     return`<tr>
@@ -2106,8 +2130,8 @@ function openRecipeIngModal(recipeId, colorKey){
   const wrap=document.getElementById('rim-suggest-wrap');
   const suggEl=document.getElementById('rim-suggest');
   if(sugg.length){
-    suggEl.innerHTML=sugg.slice(0,16).map(ing=>
-      `<button onclick="quickAddIng('${ing}')"
+    suggEl.innerHTML=sugg.map(ing=>
+      `<button onclick="quickAddIng('${ing}',this)"
         style="font-size:12px;padding:4px 10px;border-radius:99px;background:${cm.tagBg};color:${cm.text};border:none;cursor:pointer;font-weight:500;">${ing}</button>`
     ).join('');
     wrap.style.display='block';
@@ -2116,19 +2140,19 @@ function openRecipeIngModal(recipeId, colorKey){
   }
 
   document.getElementById('recipe-ing-modal').style.display='flex';
-  setTimeout(()=>document.getElementById('rim-input').focus(),100);
+  const currentIngs=r.cells[colorKey]||[];
+  setTimeout(()=>{
+    if(currentIngs.length===0) document.getElementById('rim-input').focus();
+  },100);
 }
-function quickAddIng(name){
+function quickAddIng(name, btn){
   if(!rCellId) return;
   const r=recipeRows.find(x=>x.id===rCellId.recipeId);
-  if(!r.cells[rCellId.colorKey].includes(name)) r.cells[rCellId.colorKey].push(name);
-  renderIngTags();
-  // 刷新建议列表（移除已添加的）
-  const current=r.cells[rCellId.colorKey]||[];
-  const suggEl=document.getElementById('rim-suggest');
-  if(suggEl) suggEl.querySelectorAll('button').forEach(btn=>{
-    if(current.includes(btn.textContent)) btn.style.opacity='0.3';
-  });
+  if(!r.cells[rCellId.colorKey].includes(name)){
+    r.cells[rCellId.colorKey].push(name);
+    if(btn){ btn.style.opacity='0.35'; btn.style.cursor='default'; btn.onclick=null; }
+    renderIngTags();
+  }
 }
 function closeRecipeIngModal(){
   document.getElementById('recipe-ing-modal').style.display='none';
@@ -2171,13 +2195,13 @@ function saveRecipeRows(){
       setDoc(doc(window.db,'settings','recipes'),{rows:JSON.stringify(recipeRows),cats:JSON.stringify(recipeCategories),updatedAt:Date.now()},{merge:true}).catch(e=>console.error(e));
     });
   }
-  localStorage.setItem('recipeRows',JSON.stringify(recipeRows));
-  localStorage.setItem('recipeCategories',JSON.stringify(recipeCategories));
+  ls.set('recipeRows',JSON.stringify(recipeRows));
+  ls.set('recipeCategories',JSON.stringify(recipeCategories));
 }
 function loadRecipeRows(){
-  const localCats=localStorage.getItem('recipeCategories');
+  const localCats=ls.get('recipeCategories');
   if(localCats) try{recipeCategories=JSON.parse(localCats);}catch(e){}
-  const local=localStorage.getItem('recipeRows');
+  const local=ls.get('recipeRows');
   if(local) try{recipeRows=JSON.parse(local);}catch(e){}
   renderCatBar();
   renderDiary(); // 菜谱加载后刷新饮食记录的+菜谱列表
@@ -2347,7 +2371,7 @@ function renderGoalPlan(){
   const targetIntake=Math.max(1200, diff>0?BASE_GOAL-dailyAdjust:BASE_GOAL+dailyAdjust);
   // 联动饮食记录的目标热量
   GOAL=targetIntake;
-  localStorage.setItem('daily_goal', GOAL);
+  ls.set('daily_goal', GOAL);
   document.getElementById('goal-max-label').textContent=` / ${targetIntake} 千卡`;
   renderDiary();
   planEl.innerHTML=`
@@ -2690,13 +2714,13 @@ async function delWorkoutVideo(id){
   }
 }
 function saveWorkoutData(){
-  localStorage.setItem('workoutVideos',JSON.stringify(workoutVideos));
-  localStorage.setItem('workoutCats',JSON.stringify(workoutCats));
+  ls.set('workoutVideos',JSON.stringify(workoutVideos));
+  ls.set('workoutCats',JSON.stringify(workoutCats));
 }
 function loadWorkoutData(){
-  const lv=localStorage.getItem('workoutVideos');
+  const lv=ls.get('workoutVideos');
   if(lv) try{workoutVideos=JSON.parse(lv);}catch(e){}
-  const lc=localStorage.getItem('workoutCats');
+  const lc=ls.get('workoutCats');
   if(lc) try{workoutCats=JSON.parse(lc);}catch(e){}
   renderWorkoutCatBar();
   renderWorkoutVideos();
@@ -2711,6 +2735,12 @@ function loadWorkoutData(){
 }
 
 // ── INIT ──────────────────────────────────────────
+// 点空白处关闭所有下拉
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('[id^="wc-"]')&&!e.target.closest('td[onclick*="toggleWeekCell"]')){
+    document.querySelectorAll('[id^="wc-"]').forEach(el=>el.style.display='none');
+  }
+});
 renderDiary();
 renderIng();
 loadRecipeRows();
@@ -2812,7 +2842,7 @@ onSnapshot(goalDocRef, (snap) => {
     const current = getBodyWeight();
     const diff = current - (goalWeight||current);
     GOAL = Math.max(1200, diff>0 ? BASE_GOAL-dailyAdjust : BASE_GOAL+dailyAdjust);
-    localStorage.setItem('daily_goal', GOAL);
+    ls.set('daily_goal', GOAL);
     const label = document.getElementById('goal-max-label');
     if(label) label.textContent = ` / ${GOAL} 千卡`;
     renderDiary();
