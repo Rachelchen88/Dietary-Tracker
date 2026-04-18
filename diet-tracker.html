@@ -375,6 +375,25 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
       <tbody id="week-tbody"></tbody>
     </table>
   </div>
+  <!-- 添加/编辑面板 -->
+  <div id="wm-modal" style="display:none;background:#fff;border-top:1px solid #e0dfd8;padding:16px;flex-shrink:0;">
+    <div style="font-size:12px;font-weight:500;color:#1a1a18;margin-bottom:10px;" id="wm-modal-title">手动添加食物</div>
+    <input id="wm-name" placeholder="食物名称…" style="width:100%;border:1px solid #e0dfd8;border-radius:8px;padding:9px 12px;font-size:13px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;box-sizing:border-box;margin-bottom:8px;"/>
+    <input id="wm-cal" type="number" min="0" placeholder="千卡…" style="width:100%;border:1px solid #e0dfd8;border-radius:8px;padding:9px 12px;font-size:13px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;box-sizing:border-box;margin-bottom:10px;"/>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
+      <span style="font-size:12px;color:#888;">颜色：</span>
+      <div id="wmc-red"    style="width:26px;height:26px;border-radius:50%;background:#E24B4A;cursor:pointer;flex-shrink:0;"></div>
+      <div id="wmc-yellow" style="width:26px;height:26px;border-radius:50%;background:#EF9F27;cursor:pointer;flex-shrink:0;"></div>
+      <div id="wmc-white"  style="width:26px;height:26px;border-radius:50%;background:#888780;cursor:pointer;flex-shrink:0;"></div>
+      <div id="wmc-green"  style="width:26px;height:26px;border-radius:50%;background:#639922;cursor:pointer;flex-shrink:0;"></div>
+      <div id="wmc-black"  style="width:26px;height:26px;border-radius:50%;background:#2C2C2A;cursor:pointer;flex-shrink:0;"></div>
+    </div>
+    <input type="hidden" id="wm-color" value="white"/>
+    <div style="display:flex;gap:8px;">
+      <button id="wm-cancel-btn" style="padding:10px 18px;background:#f5f4f0;border:none;border-radius:8px;font-size:13px;color:#888;cursor:pointer;font-family:var(--font-sans);">取消</button>
+      <button id="wm-save-btn" style="flex:1;padding:10px;background:#639922;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-sans);">添加</button>
+    </div>
+  </div>
 </div>
 
 <!-- PAGE 2: INGREDIENTS -->
@@ -432,34 +451,6 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
       style="background:none;border:none;padding:11px 0 11px 12px;font-size:13px;color:#639922;font-weight:500;cursor:pointer;font-family:var(--font-sans);">添加</button>
   </div>
 
-  </div>
-</div>
-
-<!-- 手动输入弹窗（周打卡用）-->
-<div id="wm-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:400;align-items:flex-end;justify-content:center;" onclick="if(event.target===this)closeWeekManual()">
-  <div style="background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;">
-    <h2 style="font-size:16px;font-weight:500;color:#1a1a18;margin-bottom:14px;" id="wm-modal-title">手动添加食物</h2>
-    <div style="margin-bottom:12px;">
-      <input id="wm-name" placeholder="食物名称…" style="width:100%;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;box-sizing:border-box;"
-        onkeydown="if(event.key==='Enter')document.getElementById('wm-cal').focus()"/>
-    </div>
-    <div style="margin-bottom:14px;">
-      <input id="wm-cal" type="number" min="0" placeholder="千卡…" style="width:100%;border:1px solid #e0dfd8;border-radius:8px;padding:10px 12px;font-size:14px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;box-sizing:border-box;"
-        onkeydown="if(event.key==='Enter')saveWeekManual()"/>
-    </div>
-    <div style="display:flex;gap:12px;margin-bottom:18px;align-items:center;">
-      <span style="font-size:12px;color:#888;flex-shrink:0;">颜色：</span>
-      <div id="wmc-red"    onclick="setWmColor('red')"    style="width:30px;height:30px;border-radius:50%;background:#E24B4A;cursor:pointer;box-shadow:0 0 0 2px #fff,0 0 0 3px transparent;"></div>
-      <div id="wmc-yellow" onclick="setWmColor('yellow')" style="width:30px;height:30px;border-radius:50%;background:#EF9F27;cursor:pointer;box-shadow:0 0 0 2px #fff,0 0 0 3px transparent;"></div>
-      <div id="wmc-white"  onclick="setWmColor('white')"  style="width:30px;height:30px;border-radius:50%;background:#888780;cursor:pointer;box-shadow:0 0 0 2px #fff,0 0 0 3px transparent;"></div>
-      <div id="wmc-green"  onclick="setWmColor('green')"  style="width:30px;height:30px;border-radius:50%;background:#639922;cursor:pointer;box-shadow:0 0 0 2px #fff,0 0 0 3px transparent;"></div>
-      <div id="wmc-black"  onclick="setWmColor('black')"  style="width:30px;height:30px;border-radius:50%;background:#2C2C2A;cursor:pointer;box-shadow:0 0 0 2px #fff,0 0 0 3px transparent;"></div>
-    </div>
-    <input type="hidden" id="wm-color" value="white"/>
-    <div style="display:flex;gap:8px;">
-      <button onclick="closeWeekManual()" style="padding:12px 20px;background:#f5f4f0;border:none;border-radius:8px;font-size:14px;color:#888;cursor:pointer;font-family:var(--font-sans);">取消</button>
-      <button onclick="saveWeekManual()" style="flex:1;padding:12px;background:#639922;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font-sans);">添加</button>
-    </div>
   </div>
 </div>
 
@@ -927,11 +918,16 @@ function renderDiary(){
     const cells=weekDates.map(d=>{
       const dk=dateKey(d); const it=dk===tKey;
       const mf=foods.filter(f=>(f.date||tKey)===dk&&f.meal===meal);
+      const CBG={red:'#F7C1C1',yellow:'#FAC775',white:'#D3D1C7',green:'#C0DD97',black:'#888780',pink:'#F4C0D1'};
+      const CTX={red:'#A32D2D',yellow:'#854F0B',white:'#444441',green:'#3B6D11',black:'#F1EFE8',pink:'#72243E'};
       const pills=mf.map(f=>{
-        return`<div style="display:inline-flex;align-items:center;gap:2px;background:#F4C0D1;border-radius:99px;padding:2px 5px 2px 7px;margin:1px;opacity:${f.checked?1:0.5};">
-          <span onclick="event.stopPropagation();editFoodCal('${f.id}')" style="font-size:10px;font-weight:500;color:#72243E;cursor:pointer;">${f.name}<span style="font-size:9px;opacity:.7;margin-left:2px;">${f.cal>0?f.cal+'卡':'＋卡'}</span></span>
-          <button onclick="event.stopPropagation();toggleCheck('${f.id}')" style="background:none;border:none;cursor:pointer;font-size:11px;color:#72243E;padding:0;line-height:1;">${f.checked?'✓':'○'}</button>
-          <button onclick="event.stopPropagation();delFood('${f.id}')" style="background:none;border:none;cursor:pointer;font-size:10px;color:#72243E;opacity:.5;padding:0;line-height:1;">×</button>
+        const ck=f.colorKey||'pink';
+        const bg=CBG[ck]||'#F4C0D1';
+        const tx=CTX[ck]||'#72243E';
+        return`<div style="display:inline-flex;align-items:center;gap:2px;background:${bg};border-radius:99px;padding:2px 5px 2px 7px;margin:1px;opacity:${f.checked?1:0.5};">
+          <span onclick="event.stopPropagation();editFoodCal('${f.id}')" style="font-size:10px;font-weight:500;color:${tx};cursor:pointer;">${f.name}<span style="font-size:9px;opacity:.7;margin-left:2px;">${f.cal>0?f.cal+'卡':'＋卡'}</span></span>
+          <button onclick="event.stopPropagation();toggleCheck('${f.id}')" style="background:none;border:none;cursor:pointer;font-size:11px;color:${tx};padding:0;line-height:1;">${f.checked?'✓':'○'}</button>
+          <button onclick="event.stopPropagation();delFood('${f.id}')" style="background:none;border:none;cursor:pointer;font-size:10px;color:${tx};opacity:.5;padding:0;line-height:1;">×</button>
         </div>`;
       }).join('');
       return`<td style="padding:4px 3px;border:0.5px solid ${it?'#C0DD97':'var(--border)'};background:${it?'#f9fdf5':'#fff'};vertical-align:top;cursor:pointer;position:relative;" onclick="toggleWeekCell('${dk}','${meal}')">
@@ -978,7 +974,16 @@ let wManualDk='', wManualMeal='';
 function openWeekManual(dk, meal){
   document.querySelectorAll('[id^="wc-"]').forEach(e=>e.style.display='none');
   wManualDk=dk; wManualMeal=meal;
-  document.getElementById('wm-modal').style.display='flex';
+  document.getElementById('wm-name').value='';
+  document.getElementById('wm-cal').value='';
+  document.getElementById('wm-color').value='pink';
+  document.getElementById('wm-name').disabled=false;
+  document.getElementById('wm-color').disabled=false;
+  ['red','yellow','white','green','black'].forEach(k=>{
+    const el=document.getElementById('wmc-'+k);
+    if(el) el.style.boxShadow='0 0 0 2px #fff,0 0 0 3px transparent';
+  });
+  document.getElementById('wm-modal').style.display='block';
   setTimeout(()=>document.getElementById('wm-name').focus(),50);
 }
 function closeWeekManual(){
@@ -1009,7 +1014,7 @@ async function saveWeekManual(){
   const cal=Math.round(parseFloat(document.getElementById('wm-cal').value)||0);
   const ck=document.getElementById('wm-color').value||'white';
   const DOTS={red:'#E24B4A',yellow:'#EF9F27',white:'#888780',green:'#639922',black:'#2C2C2A'};
-  const entry={meal:wManualMeal,name,colorKey:ck,colorDot:DOTS[ck],date:wManualDk,weight:0,cal,pro:0,carb:0,fat:0,checked:false,createdAt:Date.now()};
+  const entry={meal:wManualMeal,name,colorKey:ck||'pink',colorDot:DOTS[ck]||'#D4537E',date:wManualDk,weight:0,cal,pro:0,carb:0,fat:0,checked:false,createdAt:Date.now()};
   foods.push({id:'tmp_'+nid++,...entry});
   renderDiary(); closeWeekManual();
   if(window.db){
@@ -1032,15 +1037,19 @@ function editFoodCal(id){
   document.getElementById('wm-cal').value=f.cal||'';
   document.getElementById('wm-color').value=f.colorKey||'white';
   document.getElementById('wm-color').disabled=true;
+  ['red','yellow','white','green','black'].forEach(k=>{
+    const el=document.getElementById('wmc-'+k);
+    if(el) el.style.boxShadow=k===f.colorKey?'0 0 0 2px #fff,0 0 0 4px #1a1a18':'0 0 0 2px #fff,0 0 0 3px transparent';
+  });
   wManualDk='__edit__'; wManualMeal=id;
-  document.getElementById('wm-modal').style.display='flex';
+  document.getElementById('wm-modal').style.display='block';
   setTimeout(()=>document.getElementById('wm-cal').focus(),50);
 }
 async function addWeekRecipe(dk, meal, recipeId){
   document.querySelectorAll('[id^="wc-"]').forEach(e=>e.style.display='none');
   const r=(typeof recipeRows!=='undefined')&&recipeRows.find(x=>x.id===recipeId);
   if(!r) return;
-  const entry={meal,name:r.name,colorKey:'white',colorDot:'#888780',date:dk,weight:0,cal:0,pro:0,carb:0,fat:0,checked:false,createdAt:Date.now()};
+  const entry={meal,name:r.name,colorKey:'pink',colorDot:'#D4537E',date:dk,weight:0,cal:0,pro:0,carb:0,fat:0,checked:false,createdAt:Date.now()};
   foods.push({id:'tmp_'+nid++,...entry});
   renderDiary();
   if(window.db){
@@ -2747,6 +2756,15 @@ function loadWorkoutData(){
 }
 
 // ── INIT ──────────────────────────────────────────
+// 颜色圆点 + 按钮事件绑定
+['red','yellow','white','green','black'].forEach(ck=>{
+  const el=document.getElementById('wmc-'+ck);
+  if(el) el.addEventListener('click', e=>{ e.stopPropagation(); setWmColor(ck); });
+});
+const wmSave=document.getElementById('wm-save-btn');
+if(wmSave) wmSave.addEventListener('click', e=>{ e.stopPropagation(); saveWeekManual(); });
+const wmCancel=document.getElementById('wm-cancel-btn');
+if(wmCancel) wmCancel.addEventListener('click', e=>{ e.stopPropagation(); closeWeekManual(); });
 // 点空白处关闭所有下拉
 document.addEventListener('click', (e)=>{
   if(!e.target.closest('[id^="wc-"]')&&!e.target.closest('td[onclick*="toggleWeekCell"]')){
