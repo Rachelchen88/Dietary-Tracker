@@ -382,6 +382,7 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
     <input id="wm-cal" type="number" min="0" placeholder="千卡…" style="width:100%;border:1px solid #e0dfd8;border-radius:8px;padding:9px 12px;font-size:13px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#f9f8f5;box-sizing:border-box;margin-bottom:10px;"/>
     <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
       <span style="font-size:12px;color:#888;">颜色：</span>
+      <div id="wmc-pink"   style="width:26px;height:26px;border-radius:50%;background:#D4537E;cursor:pointer;flex-shrink:0;"></div>
       <div id="wmc-red"    style="width:26px;height:26px;border-radius:50%;background:#E24B4A;cursor:pointer;flex-shrink:0;"></div>
       <div id="wmc-yellow" style="width:26px;height:26px;border-radius:50%;background:#EF9F27;cursor:pointer;flex-shrink:0;"></div>
       <div id="wmc-white"  style="width:26px;height:26px;border-radius:50%;background:#888780;cursor:pointer;flex-shrink:0;"></div>
@@ -979,7 +980,7 @@ function openWeekManual(dk, meal){
   document.getElementById('wm-color').value='pink';
   document.getElementById('wm-name').disabled=false;
   document.getElementById('wm-color').disabled=false;
-  ['red','yellow','white','green','black'].forEach(k=>{
+  ['pink','red','yellow','white','green','black'].forEach(k=>{
     const el=document.getElementById('wmc-'+k);
     if(el) el.style.boxShadow='0 0 0 2px #fff,0 0 0 3px transparent';
   });
@@ -993,17 +994,19 @@ function closeWeekManual(){
   document.getElementById('wm-name').value='';
   document.getElementById('wm-cal').value='';
   document.getElementById('wm-color').value='white';
-  ['red','yellow','white','green','black'].forEach(k=>{const el=document.getElementById('wmc-'+k);if(el)el.style.boxShadow='0 0 0 2px #fff,0 0 0 3px transparent';});
+  ['pink','red','yellow','white','green','black'].forEach(k=>{const el=document.getElementById('wmc-'+k);if(el)el.style.boxShadow='0 0 0 2px #fff,0 0 0 3px transparent';});
 }
 async function saveWeekManual(){
   if(wManualDk==='__edit__'){
     const f=foods.find(x=>String(x.id)===String(wManualMeal));
     if(f){
       f.cal=Math.round(parseFloat(document.getElementById('wm-cal').value)||0);
+      const newCk=document.getElementById('wm-color').value;
+      if(newCk) f.colorKey=newCk;
       renderDiary();
       if(window.db){
         import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js').then(({doc,setDoc})=>{
-          setDoc(doc(window.db,'foods',String(wManualMeal)),{cal:f.cal},{merge:true}).catch(e=>console.error(e));
+          setDoc(doc(window.db,'foods',String(wManualMeal)),{cal:f.cal,colorKey:f.colorKey},{merge:true}).catch(e=>console.error(e));
         });
       }
     }
@@ -1024,7 +1027,7 @@ async function saveWeekManual(){
 }
 function setWmColor(ck){
   document.getElementById('wm-color').value=ck;
-  ['red','yellow','white','green','black'].forEach(k=>{
+  ['pink','red','yellow','white','green','black'].forEach(k=>{
     const el=document.getElementById('wmc-'+k);
     if(el) el.style.boxShadow=k===ck?'0 0 0 2px #fff,0 0 0 4px #1a1a18':'0 0 0 2px #fff,0 0 0 3px transparent';
   });
@@ -1035,11 +1038,11 @@ function editFoodCal(id){
   document.getElementById('wm-name').value=f.name;
   document.getElementById('wm-name').disabled=true;
   document.getElementById('wm-cal').value=f.cal||'';
-  document.getElementById('wm-color').value=f.colorKey||'white';
-  document.getElementById('wm-color').disabled=true;
-  ['red','yellow','white','green','black'].forEach(k=>{
+  document.getElementById('wm-color').value=f.colorKey||'pink';
+  document.getElementById('wm-color').disabled=false;
+  ['pink','red','yellow','white','green','black'].forEach(k=>{
     const el=document.getElementById('wmc-'+k);
-    if(el) el.style.boxShadow=k===f.colorKey?'0 0 0 2px #fff,0 0 0 4px #1a1a18':'0 0 0 2px #fff,0 0 0 3px transparent';
+    if(el) el.style.boxShadow=k===(f.colorKey||'pink')?'0 0 0 2px #fff,0 0 0 4px #1a1a18':'0 0 0 2px #fff,0 0 0 3px transparent';
   });
   wManualDk='__edit__'; wManualMeal=id;
   document.getElementById('wm-modal').style.display='block';
@@ -2757,7 +2760,7 @@ function loadWorkoutData(){
 
 // ── INIT ──────────────────────────────────────────
 // 颜色圆点 + 按钮事件绑定
-['red','yellow','white','green','black'].forEach(ck=>{
+['pink','red','yellow','white','green','black'].forEach(ck=>{
   const el=document.getElementById('wmc-'+ck);
   if(el) el.addEventListener('click', e=>{ e.stopPropagation(); setWmColor(ck); });
 });
