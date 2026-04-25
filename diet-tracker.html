@@ -956,13 +956,18 @@ function renderDiary(){
         const ck=f.colorKey||'pink';
         const bg=CBG[ck]||'#F4C0D1';
         const tx=CTX[ck]||'#72243E';
-        return`<div style="display:inline-flex;align-items:center;gap:2px;background:${bg};border-radius:99px;padding:2px 5px 2px 7px;margin:1px;opacity:${f.checked?1:0.5};">
+        return`<div draggable="true" ondragstart="dragFood('${f.id}')" ondragend="dragEnd()"
+          style="display:inline-flex;align-items:center;gap:2px;background:${bg};border-radius:99px;padding:2px 5px 2px 7px;margin:1px;opacity:${f.checked?1:0.5};cursor:grab;">
           <span onclick="event.stopPropagation();editFoodCal('${f.id}')" style="font-size:10px;font-weight:500;color:${tx};cursor:pointer;">${f.name}<span style="font-size:9px;opacity:.7;margin-left:2px;">${f.cal>0?f.cal+'卡':'＋卡'}</span></span>
           <button onclick="event.stopPropagation();toggleCheck('${f.id}')" style="background:none;border:none;cursor:pointer;font-size:11px;color:${tx};padding:0;line-height:1;">${f.checked?'✓':'○'}</button>
           <button onclick="event.stopPropagation();delFood('${f.id}')" style="background:none;border:none;cursor:pointer;font-size:10px;color:${tx};opacity:.5;padding:0;line-height:1;">×</button>
         </div>`;
       }).join('');
-      return`<td style="padding:4px 3px;border:0.5px solid ${it?'#C0DD97':'var(--border)'};background:${it?'#f9fdf5':'#fff'};vertical-align:top;cursor:pointer;position:relative;" onclick="toggleWeekCell('${dk}','${meal}')">
+      return`<td draggable="false"
+        ondragover="event.preventDefault();this.style.background='#EAF3DE'"
+        ondragleave="this.style.background='${it?'#f9fdf5':'#fff'}'"
+        ondrop="event.preventDefault();dropFood('${dk}','${meal}',this,'${it?'#f9fdf5':'#fff'}')"
+        style="padding:4px 3px;border:0.5px solid ${it?'#C0DD97':'var(--border)'};background:${it?'#f9fdf5':'#fff'};vertical-align:top;cursor:pointer;position:relative;" onclick="toggleWeekCell('${dk}','${meal}')">
         ${pills}<div style="text-align:center;color:#ccc;font-size:12px;padding:${mf.length?1:3}px 0;">+</div>
         <div id="wc-${dk}-${meal}" style="display:none;position:absolute;left:0;top:100%;z-index:99;background:#fff;border:1px solid #e0dfd8;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.1);min-width:130px;max-height:200px;overflow-y:auto;" onclick="event.stopPropagation()"></div>
       </td>`;
@@ -974,7 +979,24 @@ function renderDiary(){
   if(tbody) tbody.innerHTML=calCells.length?`<tr><td style="padding:4px 3px;border:0.5px solid var(--border);background:var(--surface2);font-size:10px;color:var(--text3);text-align:center;">热量</td>${calCells}</tr>${mealRows}`:mealRows;
 }
 
-let currentNoteDk='';
+let dragFoodId=null;
+function dragFood(id){ dragFoodId=id; }
+function dragEnd(){ dragFoodId=null; }
+async function dropFood(dk, meal, td, origBg){
+  td.style.background=origBg;
+  if(!dragFoodId) return;
+  const f=foods.find(x=>String(x.id)===String(dragFoodId));
+  if(!f) return;
+  f.date=dk; f.meal=meal;
+  renderDiary();
+  if(window.db){
+    try{
+      const {doc,setDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      await setDoc(doc(window.db,'foods',String(dragFoodId)),{date:dk,meal},{merge:true});
+    }catch(e){console.error(e);}
+  }
+  dragFoodId=null;
+}
 function editDayNote(dk){
   currentNoteDk=dk;
   const d=new Date(dk+'T12:00:00');
