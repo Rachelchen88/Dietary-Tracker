@@ -583,7 +583,7 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
 </div>
 
 <!-- PAGE 5: BODY & EXERCISE -->
-<div class="page" id="page-body">
+<div class="page" id="page-body" style="position:relative;">
   <div style="padding:20px 24px 0;flex-shrink:0;">
     <h1 style="font-family:var(--font-serif);font-size:26px;font-weight:600;letter-spacing:-.3px;">体重 & 运动</h1>
     <div style="font-size:13px;color:var(--text2);margin-top:2px;" id="body-date-str"></div>
@@ -608,6 +608,11 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
           <div class="brc-prev" id="brc-prev">暂无记录</div>
           <div class="brc-trend" id="brc-trend"></div>
         </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0 6px;border-top:1px solid var(--border);margin-top:8px;">
+        <button onclick="shiftBodyDay(-1)" style="background:none;border:none;font-size:18px;color:var(--text2);cursor:pointer;padding:0 6px;line-height:1;">‹</button>
+        <button id="body-day-btn" onclick="openBodyCalendar()" style="background:none;border:none;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;font-family:var(--font-sans);">今天</button>
+        <button onclick="shiftBodyDay(1)" id="body-day-next" style="background:none;border:none;font-size:18px;color:var(--text2);cursor:pointer;padding:0 6px;line-height:1;" disabled>›</button>
       </div>
       <div class="brc-net">
         <div class="brc-net-item">
@@ -687,9 +692,23 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
     </div>
 
   </div>
+  <!-- 日历弹窗 -->
+  <div id="body-cal-modal" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.4);z-index:50;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:12px;padding:16px;width:280px;box-shadow:0 8px 24px rgba(0,0,0,.15);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <button id="cal-prev-btn" style="background:none;border:none;font-size:18px;cursor:pointer;color:#555;padding:0 8px;">‹</button>
+        <span id="cal-month-label" style="font-size:14px;font-weight:500;color:#1a1a18;"></span>
+        <button id="cal-next-btn" style="background:none;border:none;font-size:18px;cursor:pointer;color:#555;padding:0 8px;">›</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;margin-bottom:6px;">
+        <div style="font-size:10px;color:#aaa;">日</div><div style="font-size:10px;color:#aaa;">一</div><div style="font-size:10px;color:#aaa;">二</div>
+        <div style="font-size:10px;color:#aaa;">三</div><div style="font-size:10px;color:#aaa;">四</div><div style="font-size:10px;color:#aaa;">五</div><div style="font-size:10px;color:#aaa;">六</div>
+      </div>
+      <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;"></div>
+      <button id="cal-cancel-btn" style="width:100%;margin-top:12px;padding:9px;background:#f5f4f0;border:none;border-radius:8px;font-size:13px;color:#888;cursor:pointer;font-family:var(--font-sans);">取消</button>
+    </div>
+  </div>
 </div>
-
-<!-- BOTTOM NAV -->
 <nav class="bottom-nav">
   <div class="nav-item active" onclick="sw('diary',this)"><div class="nav-icon">📋</div><div class="nav-label">饮食</div></div>
   <div class="nav-item" onclick="sw('recipe',this)"><div class="nav-icon">🍳</div><div class="nav-label">菜谱</div></div>
@@ -2513,6 +2532,7 @@ function renderGoalPlan(){
 }
 
 function renderBody(){
+  renderBodyDayNav();
   const today=new Date();
   const days=['日','一','二','三','四','五','六'];
   document.getElementById('body-date-str').textContent=
@@ -2543,8 +2563,9 @@ function renderBody(){
   }
 
   // ring: weight goal progress
-  const todayIntake=(window.foods||foods).filter(f=>(f.date||todayKey())===todayKey()).reduce((s,f)=>s+f.cal,0);
-  const todayBurn=exerciseLog.filter(e=>e.date===todayKey()).reduce((s,e)=>s+e.cal,0);
+  const bodyDk=dateKey(getBodyDate());
+  const todayIntake=(window.foods||foods).filter(f=>(f.date||todayKey())===bodyDk).reduce((s,f)=>s+(f.cal||0),0);
+  const todayBurn=exerciseLog.filter(e=>e.date===bodyDk).reduce((s,e)=>s+(e.cal||0),0);
   const circumference=239;
   const goalW=mGoalWeight||parseFloat(document.getElementById('goal-weight')?.value)||0;
   let pct=0;
@@ -2575,11 +2596,13 @@ function renderBody(){
 
   // weight history rows
   const wList=document.getElementById('weight-list');
-  const hist=[...sorted].reverse().slice(0,8);
+  const allHist=[...sorted].reverse();
+  const showAll=wList.dataset.showAll==='1';
+  const hist=showAll?allHist:allHist.slice(0,8);
   if(!hist.length){
     wList.innerHTML='<div class="wh-empty">暂无记录，添加第一条体重数据</div>';
   } else {
-    const allVals=hist.map(w=>w.val);
+    const allVals=allHist.map(w=>w.val);
     const mn=Math.min(...allVals), mx2=Math.max(...allVals);
     const range=mx2-mn||1;
     wList.innerHTML=hist.map((w,i)=>{
@@ -2601,7 +2624,7 @@ function renderBody(){
         ${diffHtml}
         <button class="wh-del" onclick="delWeight('${w.id}')">×</button>
       </div>`;
-    }).join('');
+    }).join('')+(allHist.length>8?`<div onclick="toggleWeightHistory()" style="padding:10px;text-align:center;font-size:12px;color:var(--accent);cursor:pointer;border-top:1px solid var(--border);">${showAll?'收起 ↑':'查看全部 '+allHist.length+' 条 ↓'}</div>`:'');
   }
 
   // exercise list
@@ -2639,6 +2662,11 @@ async function saveWeight(){
     renderBody();
   }
   document.getElementById('w-val').value='';
+}
+function toggleWeightHistory(){
+  const wList=document.getElementById('weight-list');
+  wList.dataset.showAll=wList.dataset.showAll==='1'?'0':'1';
+  renderBody();
 }
 async function delWeight(id){
   if(window.db){
@@ -2848,6 +2876,85 @@ function loadWorkoutData(){
   }
 }
 
+// 体重页日期导航
+let bodyDayOffset=0;
+let calViewYear=new Date().getFullYear(), calViewMonth=new Date().getMonth();
+
+function getBodyDate(){
+  const d=new Date();
+  d.setDate(d.getDate()+bodyDayOffset);
+  return d;
+}
+function shiftBodyDay(delta){
+  bodyDayOffset+=delta;
+  if(bodyDayOffset>0) bodyDayOffset=0;
+  renderBodyDayNav();
+  renderBodyNetCals();
+}
+function renderBodyDayNav(){
+  const d=getBodyDate();
+  const isToday=bodyDayOffset===0;
+  const days=['日','一','二','三','四','五','六'];
+  const label=isToday?'今天':`${d.getMonth()+1}月${d.getDate()}日 周${days[d.getDay()]}`;
+  const btn=document.getElementById('body-day-btn');
+  if(btn) btn.textContent=label;
+  const next=document.getElementById('body-day-next');
+  if(next) next.disabled=isToday;
+}
+function renderBodyNetCals(){
+  const dk=dateKey(getBodyDate());
+  const intake=Math.round((window.foods||foods).filter(f=>(f.date||todayKey())===dk).reduce((s,f)=>s+(f.cal||0),0));
+  const burn=Math.round(exerciseLog.filter(e=>e.date===dk).reduce((s,e)=>s+(e.cal||0),0));
+  const net=intake-burn;
+  const intakeEl=document.getElementById('brc-intake');
+  const burnEl=document.getElementById('brc-burn');
+  const netEl=document.getElementById('brc-net');
+  if(intakeEl) intakeEl.textContent=intake;
+  if(burnEl) burnEl.textContent=burn;
+  if(netEl){netEl.textContent=net;netEl.style.color=net>GOAL?'var(--red)':net<1200&&net>0?'var(--yellow-text)':'var(--text)';}
+}
+function openBodyCalendar(){
+  calViewYear=new Date().getFullYear();
+  calViewMonth=new Date().getMonth();
+  renderCalGrid();
+  document.getElementById('body-cal-modal').style.display='flex';
+}
+function closeBodyCalendar(){
+  document.getElementById('body-cal-modal').style.display='none';
+}
+function shiftCalMonth(delta){
+  calViewMonth+=delta;
+  if(calViewMonth>11){calViewMonth=0;calViewYear++;}
+  if(calViewMonth<0){calViewMonth=11;calViewYear--;}
+  renderCalGrid();
+}
+function renderCalGrid(){
+  document.getElementById('cal-month-label').textContent=`${calViewYear}年${calViewMonth+1}月`;
+  const firstDay=new Date(calViewYear,calViewMonth,1).getDay();
+  const daysInMonth=new Date(calViewYear,calViewMonth+1,0).getDate();
+  const tKey=todayKey();
+  const selDk=dateKey(getBodyDate());
+  let html='';
+  for(let i=0;i<firstDay;i++) html+=`<div></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const dk=`${calViewYear}-${String(calViewMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday=dk===tKey;
+    const isSel=dk===selDk;
+    const future=dk>tKey;
+    html+=`<div onclick="${future?'':'pickBodyDay(\''+dk+'\')'}" style="padding:5px 2px;font-size:12px;border-radius:6px;cursor:${future?'default':'pointer'};background:${isSel?'#639922':isToday?'#EAF3DE':'none'};color:${future?'#ddd':isSel?'#fff':isToday?'#3B6D11':'#1a1a18'};font-weight:${isSel||isToday?'600':'400'};">${d}</div>`;
+  }
+  document.getElementById('cal-grid').innerHTML=html;
+}
+function pickBodyDay(dk){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const picked=new Date(dk+'T12:00:00');
+  bodyDayOffset=Math.round((picked-today)/(1000*60*60*24));
+  if(bodyDayOffset>0) bodyDayOffset=0;
+  closeBodyCalendar();
+  renderBodyDayNav();
+  renderBodyNetCals();
+}
+
 // ── INIT ──────────────────────────────────────────
 // 加载备注
 try{ weekNotes=JSON.parse(ls.get('weekNotes')||'{}'); }catch(e){}
@@ -2915,7 +3022,13 @@ document.getElementById('timer-reset-btn').addEventListener('click',()=>{
   document.getElementById('timer-start-btn').style.background='#639922';
   document.getElementById('timer-reset-btn').style.display='none';
 });
-// 颜色圆点 + 按钮事件绑定
+// 日历按钮绑定
+const calPrev=document.getElementById('cal-prev-btn');
+const calNext=document.getElementById('cal-next-btn');
+const calCancel=document.getElementById('cal-cancel-btn');
+if(calPrev) calPrev.addEventListener('click',()=>shiftCalMonth(-1));
+if(calNext) calNext.addEventListener('click',()=>shiftCalMonth(1));
+if(calCancel) calCancel.addEventListener('click',closeBodyCalendar);
 ['pink','red','yellow','white','green','black'].forEach(ck=>{
   const el=document.getElementById('wmc-'+ck);
   if(el) el.addEventListener('click', e=>{ e.stopPropagation(); setWmColor(ck); });
