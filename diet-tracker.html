@@ -620,9 +620,17 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
           <div class="brc-net-val" id="brc-intake">0</div>
         </div>
         <div class="brc-net-sep"></div>
-        <div class="brc-net-item">
-          <div class="brc-net-label">运动消耗</div>
+        <div class="brc-net-item" onclick="toggleBurnInput()" style="cursor:pointer;">
+          <div class="brc-net-label">运动消耗 <span style="font-size:10px;color:#aaa;">＋</span></div>
           <div class="brc-net-val" id="brc-burn" style="color:var(--red-text)">0</div>
+          <div id="burn-input-wrap" style="display:none;margin-top:6px;" onclick="event.stopPropagation()">
+            <div style="display:flex;gap:4px;align-items:center;">
+              <input id="burn-quick-cal" type="number" min="0" placeholder="千卡"
+                style="width:70px;border:1px solid #e0dfd8;border-radius:6px;padding:5px 7px;font-size:12px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#fff;text-align:center;"
+                onkeydown="if(event.key==='Enter')saveBurnQuick()"/>
+              <button onclick="saveBurnQuick()" style="background:#639922;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;white-space:nowrap;">添加</button>
+            </div>
+          </div>
         </div>
         <div class="brc-net-sep"></div>
         <div class="brc-net-item">
@@ -2884,6 +2892,29 @@ function getBodyDate(){
   const d=new Date();
   d.setDate(d.getDate()+bodyDayOffset);
   return d;
+}
+function toggleBurnInput(){
+  const wrap=document.getElementById('burn-input-wrap');
+  if(!wrap) return;
+  const open=wrap.style.display==='block';
+  wrap.style.display=open?'none':'block';
+  if(!open) setTimeout(()=>document.getElementById('burn-quick-cal')?.focus(),50);
+}
+async function saveBurnQuick(){
+  const cal=Math.round(parseFloat(document.getElementById('burn-quick-cal')?.value)||0);
+  if(!cal) return;
+  const dk=dateKey(getBodyDate());
+  const entry={date:dk,type:'运动',icon:'🏃',min:0,cal,createdAt:Date.now()};
+  exerciseLog.push({id:'tmp_'+Date.now(),...entry});
+  document.getElementById('burn-quick-cal').value='';
+  document.getElementById('burn-input-wrap').style.display='none';
+  renderBody();
+  if(window.db){
+    try{
+      const {collection,addDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      await addDoc(collection(window.db,'exercises'),entry);
+    }catch(e){console.error(e);}
+  }
 }
 function shiftBodyDay(delta){
   bodyDayOffset+=delta;
