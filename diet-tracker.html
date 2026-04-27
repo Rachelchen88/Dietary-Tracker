@@ -630,8 +630,8 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
             <div style="display:flex;gap:4px;align-items:center;">
               <input id="burn-quick-cal" type="number" min="0" placeholder="千卡"
                 style="width:70px;border:1px solid #e0dfd8;border-radius:6px;padding:5px 7px;font-size:12px;color:#1a1a18;font-family:var(--font-sans);outline:none;background:#fff;text-align:center;"
-                onkeydown="if(event.key==='Enter')saveBurnQuick()"/>
-              <button onclick="saveBurnQuick()" style="background:#639922;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;white-space:nowrap;">添加</button>
+                onkeydown="event.stopPropagation();if(event.key==='Enter')saveBurnQuick()"/>
+              <button onclick="event.stopPropagation();saveBurnQuick()" style="background:#639922;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;white-space:nowrap;">添加</button>
             </div>
           </div>
         </div>
