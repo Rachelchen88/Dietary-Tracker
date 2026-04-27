@@ -966,12 +966,24 @@ function renderDiary(){
   const calCells=weekDates.map(d=>{
     const dk=dateKey(d); const it=dk===tKey;
     const cal=Math.round(foods.filter(f=>(f.date||tKey)===dk).reduce((s,f)=>s+(f.cal||0),0));
-    const over=cal>GOAL; const pct=Math.min(100,cal/GOAL*100);
+    const burn=Math.round(exerciseLog.filter(e=>e.date===dk).reduce((s,e)=>s+(e.cal||0),0));
+    const net=cal-burn;
+    const over=net>GOAL; const pct=Math.min(100,net/GOAL*100);
     return`<td style="padding:4px 3px;border:0.5px solid ${it?'#C0DD97':'var(--border)'};background:${it?'#f9fdf5':'#fff'};text-align:center;">
-      ${cal?`<div style="font-size:11px;font-weight:600;color:${over?'#EF6820':'#639922'};">${cal}</div>
+      ${cal?`<div style="font-size:11px;font-weight:600;color:${over?'#EF6820':'#639922'};">${net}</div>
       <div style="height:3px;background:#e0dfd8;border-radius:2px;margin:2px 0;"><div style="height:100%;border-radius:2px;background:${over?'#EF6820':'#639922'};width:${pct}%;"></div></div>
-      <div style="font-size:9px;color:${over?'#EF6820':'var(--text3)'};">${over?'超'+(cal-GOAL):'/ '+GOAL}</div>`
+      <div style="font-size:9px;color:${over?'#EF6820':'var(--text3)'};">${over?'超'+(net-GOAL):'/ '+GOAL}</div>`
       :`<span style="font-size:10px;color:var(--text3);">—</span>`}
+    </td>`;
+  }).join('');
+
+  // 运动消耗行
+  const burnCells=weekDates.map(d=>{
+    const dk=dateKey(d); const it=dk===tKey;
+    const burn=Math.round(exerciseLog.filter(e=>e.date===dk).reduce((s,e)=>s+(e.cal||0),0));
+    return`<td style="padding:4px 3px;border:0.5px solid ${it?'#C0DD97':'var(--border)'};background:${it?'#f9fdf5':'#fff'};text-align:center;cursor:pointer;" onclick="event.stopPropagation();openWeekBurnInput('${dk}',this)">
+      ${burn?`<div style="font-size:11px;font-weight:600;color:#E24B4A;">-${burn}</div>`
+            :`<span style="font-size:12px;color:#ccc;">+</span>`}
     </td>`;
   }).join('');
 
@@ -1006,7 +1018,10 @@ function renderDiary(){
   }).join('');
 
   const tbody=document.getElementById('week-tbody');
-  if(tbody) tbody.innerHTML=calCells.length?`<tr><td style="padding:4px 3px;border:0.5px solid var(--border);background:var(--surface2);font-size:10px;color:var(--text3);text-align:center;">热量</td>${calCells}</tr>${mealRows}`:mealRows;
+  if(tbody) tbody.innerHTML=calCells.length?
+    `<tr><td style="padding:4px 3px;border:0.5px solid var(--border);background:var(--surface2);font-size:10px;color:var(--text3);text-align:center;">热量</td>${calCells}</tr>
+     <tr><td style="padding:4px 3px;border:0.5px solid var(--border);background:var(--surface2);font-size:10px;color:#E24B4A;text-align:center;white-space:nowrap;">运动</td>${burnCells}</tr>
+     ${mealRows}`:mealRows;
 }
 
 let dragFoodId=null;
@@ -1026,6 +1041,43 @@ async function dropFood(dk, meal, td, origBg){
     }catch(e){console.error(e);}
   }
   dragFoodId=null;
+}
+let burnPopupDk=null;
+function openWeekBurnInput(dk, td){
+  burnPopupDk=dk;
+  document.querySelectorAll('[id^="wc-"]').forEach(e=>e.style.display='none');
+  const popup=document.getElementById('burn-popup');
+  const rect=td.getBoundingClientRect();
+  popup.style.left=Math.min(rect.left, window.innerWidth-160)+'px';
+  popup.style.top=(rect.bottom+4)+'px';
+  popup.style.display='block';
+  const inp=document.getElementById('burn-popup-input');
+  inp.value='';
+  setTimeout(()=>inp.focus(),50);
+}
+function closeBurnPopup(){
+  document.getElementById('burn-popup').style.display='none';
+  burnPopupDk=null;
+}
+async function saveBurnPopup(){
+  const cal=Math.round(parseFloat(document.getElementById('burn-popup-input').value)||0);
+  closeBurnPopup();
+  if(!cal) return;
+  const dk=burnPopupDk||dateKey(new Date());
+  const entry={date:dk,name:'运动',type:'运动',icon:'🏃',minutes:0,min:0,cal,createdAt:Date.now()};
+  if(window.db){
+    try{
+      const {collection,addDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      await addDoc(collection(window.db,'exercises'),entry);
+    }catch(e){
+      console.error(e);
+      exerciseLog.push({id:Date.now().toString(),...entry});
+      renderDiary();
+    }
+  } else {
+    exerciseLog.push({id:Date.now().toString(),...entry});
+    renderDiary();
+  }
 }
 function editDayNote(dk){
   currentNoteDk=dk;
@@ -2960,16 +3012,23 @@ async function saveBurnQuick(){
   const cal=Math.round(parseFloat(document.getElementById('burn-quick-cal')?.value)||0);
   if(!cal) return;
   const dk=dateKey(getBodyDate());
-  const entry={date:dk,type:'运动',icon:'🏃',min:0,cal,createdAt:Date.now()};
-  exerciseLog.push({id:'tmp_'+Date.now(),...entry});
+  const entry={date:dk,name:'运动',type:'运动',icon:'🏃',minutes:0,min:0,cal,createdAt:Date.now()};
   document.getElementById('burn-quick-cal').value='';
   document.getElementById('burn-input-wrap').style.display='none';
-  renderBody();
   if(window.db){
     try{
       const {collection,addDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
       await addDoc(collection(window.db,'exercises'),entry);
-    }catch(e){console.error(e);}
+      // onSnapshot 会自动触发 renderBody()
+    }catch(e){
+      console.error('saveBurnQuick error',e);
+      // Firebase 失败时降级到本地
+      exerciseLog.push({id:Date.now().toString(),...entry});
+      renderBody();
+    }
+  } else {
+    exerciseLog.push({id:Date.now().toString(),...entry});
+    renderBody();
   }
 }
 function shiftBodyDay(delta){
@@ -3136,6 +3195,9 @@ document.addEventListener('click', (e)=>{
   if(!e.target.closest('[id^="wc-"]')&&!e.target.closest('td[onclick*="toggleWeekCell"]')){
     document.querySelectorAll('[id^="wc-"]').forEach(el=>el.style.display='none');
   }
+  if(!e.target.closest('#burn-popup')&&!e.target.closest('td[onclick*="openWeekBurnInput"]')){
+    closeBurnPopup();
+  }
 });
 renderDiary();
 renderIng();
@@ -3207,6 +3269,7 @@ const eq = query(collection(db,'exercises'), orderBy("createdAt","asc"));
 onSnapshot(eq, (snapshot) => {
   exerciseLog = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
   if(document.getElementById('page-body').classList.contains('active')) renderBody();
+  if(document.getElementById('page-diary').classList.contains('active')) renderDiary();
 }, err => console.error('exercises snapshot error',err));
 
 // 实时监听自定义食材
@@ -3341,6 +3404,15 @@ window.addToDiary = async function(name, cal) {
 
 setSyncStatus('syncing');
 </script>
+
+<!-- 运动消耗全局弹框 -->
+<div id="burn-popup" style="display:none;position:fixed;z-index:500;background:#fff;border:1px solid #e0dfd8;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.15);padding:12px;width:140px;" onclick="event.stopPropagation()">
+  <div style="font-size:11px;color:#888;margin-bottom:6px;text-align:center;">运动消耗（千卡）</div>
+  <input id="burn-popup-input" type="number" min="0" placeholder="千卡"
+    style="width:100%;border:1px solid #e0dfd8;border-radius:6px;padding:6px 8px;font-size:14px;text-align:center;outline:none;margin-bottom:8px;"
+    onkeydown="if(event.key==='Enter')saveBurnPopup();if(event.key==='Escape')closeBurnPopup();"/>
+  <button onclick="saveBurnPopup()" style="width:100%;background:#639922;color:#fff;border:none;border-radius:6px;padding:7px;font-size:13px;font-weight:500;cursor:pointer;">保存</button>
+</div>
 
 </body>
 </html>
