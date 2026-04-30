@@ -684,7 +684,7 @@ body{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;
 
     <!-- Exercise section -->
     <div class="ex-section" style="margin-bottom:20px">
-      <div class="ex-head">今日运动</div>
+      <div class="ex-head" id="ex-head-title">今日运动</div>
       <div id="exercise-list"></div>
       <div class="ex-add">
         <div class="ia-field" style="min-width:110px">
@@ -1043,12 +1043,45 @@ async function dropFood(dk, meal, td, origBg){
   dragFoodId=null;
 }
 let burnPopupDk=null;
+function renderBurnPopupList(){
+  const list=document.getElementById('burn-popup-list');
+  if(!list) return;
+  const entries=exerciseLog.filter(e=>e.date===burnPopupDk);
+  if(!entries.length){list.innerHTML='<div style="font-size:11px;color:#aaa;text-align:center;padding:2px 0;">暂无记录</div>';return;}
+  list.innerHTML=entries.map(e=>`
+    <div style="display:flex;align-items:center;gap:6px;background:#f5f4f0;border-radius:6px;padding:5px 8px;">
+      <span style="font-size:12px;flex:1;color:#333;">${e.icon||'🏃'} ${e.name||'运动'}</span>
+      <span style="font-size:12px;font-weight:500;color:#E24B4A;flex-shrink:0;">−${e.cal}</span>
+      <button onclick="delBurnEntry('${e.id}')" style="background:none;border:none;cursor:pointer;color:#aaa;font-size:13px;padding:0 2px;line-height:1;flex-shrink:0;" title="删除">×</button>
+    </div>`).join('');
+}
+async function delBurnEntry(id){
+  if(window.db){
+    try{
+      const {deleteDoc,doc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      await deleteDoc(doc(window.db,'exercises',String(id)));
+    }catch(e){
+      exerciseLog=exerciseLog.filter(ex=>ex.id!==id);
+      renderBurnPopupList();
+      renderDiary();renderBody();
+    }
+  } else {
+    exerciseLog=exerciseLog.filter(ex=>ex.id!==id);
+    renderBurnPopupList();
+    renderDiary();renderBody();
+  }
+}
 function openWeekBurnInput(dk, td){
   burnPopupDk=dk;
   document.querySelectorAll('[id^="wc-"]').forEach(e=>e.style.display='none');
   const popup=document.getElementById('burn-popup');
+  // update title with date
+  const d=new Date(dk+'T12:00:00');
+  const titleEl=document.getElementById('burn-popup-title');
+  if(titleEl) titleEl.textContent=`${d.getMonth()+1}月${d.getDate()}日 运动消耗`;
+  renderBurnPopupList();
   const rect=td.getBoundingClientRect();
-  popup.style.left=Math.min(rect.left, window.innerWidth-160)+'px';
+  popup.style.left=Math.min(rect.left, window.innerWidth-250)+'px';
   popup.style.top=(rect.bottom+4)+'px';
   popup.style.display='block';
   const inp=document.getElementById('burn-popup-input');
@@ -1061,8 +1094,8 @@ function closeBurnPopup(){
 }
 async function saveBurnPopup(){
   const cal=Math.round(parseFloat(document.getElementById('burn-popup-input').value)||0);
-  closeBurnPopup();
-  if(!cal) return;
+  if(!cal){document.getElementById('burn-popup-input').focus();return;}
+  document.getElementById('burn-popup-input').value='';
   const dk=burnPopupDk||dateKey(new Date());
   const entry={date:dk,name:'运动',type:'运动',icon:'🏃',minutes:0,min:0,cal,createdAt:Date.now()};
   if(window.db){
@@ -1072,11 +1105,13 @@ async function saveBurnPopup(){
     }catch(e){
       console.error(e);
       exerciseLog.push({id:Date.now().toString(),...entry});
-      renderDiary();
+      renderBurnPopupList();
+      renderDiary();renderBody();
     }
   } else {
     exerciseLog.push({id:Date.now().toString(),...entry});
-    renderDiary();
+    renderBurnPopupList();
+    renderDiary();renderBody();
   }
 }
 function editDayNote(dk){
@@ -2745,9 +2780,13 @@ function renderBody(){
 
   // exercise list
   const exList=document.getElementById('exercise-list');
-  const todayEx=exerciseLog.filter(e=>e.date===todayKey());
+  const exBodyDk=dateKey(getBodyDate());
+  const isBodyToday=exBodyDk===todayKey();
+  const exHeadTitle=document.getElementById('ex-head-title');
+  if(exHeadTitle){const bd=getBodyDate();exHeadTitle.textContent=isBodyToday?'今日运动':`${bd.getMonth()+1}月${bd.getDate()}日运动`;}
+  const todayEx=exerciseLog.filter(e=>e.date===exBodyDk);
   if(!todayEx.length){
-    exList.innerHTML='<div class="ex-empty">今天还没有运动记录</div>';
+    exList.innerHTML=`<div class="ex-empty">${isBodyToday?'今天':'该日'}还没有运动记录</div>`;
   } else {
     exList.innerHTML=todayEx.map(e=>`
       <div class="ex-row">
@@ -2805,7 +2844,7 @@ async function saveExercise(){
   const weight=getBodyWeight();
   const autoCal=meta?Math.round(meta.met*weight*3.5/200*minutes):0;
   const cal=Math.round(parseFloat(document.getElementById('ex-cal').value)||autoCal);
-  const entry={date:todayKey(),name,icon:icon||'🏋',minutes,cal,createdAt:Date.now()};
+  const entry={date:dateKey(getBodyDate()),name,icon:icon||'🏋',minutes,cal,createdAt:Date.now()};
   if(window.db){
     try{
       const {collection,addDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
@@ -3270,6 +3309,7 @@ onSnapshot(eq, (snapshot) => {
   exerciseLog = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
   if(document.getElementById('page-body').classList.contains('active')) renderBody();
   if(document.getElementById('page-diary').classList.contains('active')) renderDiary();
+  if(document.getElementById('burn-popup').style.display!=='none') renderBurnPopupList();
 }, err => console.error('exercises snapshot error',err));
 
 // 实时监听自定义食材
@@ -3406,12 +3446,15 @@ setSyncStatus('syncing');
 </script>
 
 <!-- 运动消耗全局弹框 -->
-<div id="burn-popup" style="display:none;position:fixed;z-index:500;background:#fff;border:1px solid #e0dfd8;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.15);padding:12px;width:140px;" onclick="event.stopPropagation()">
-  <div style="font-size:11px;color:#888;margin-bottom:6px;text-align:center;">运动消耗（千卡）</div>
-  <input id="burn-popup-input" type="number" min="0" placeholder="千卡"
-    style="width:100%;border:1px solid #e0dfd8;border-radius:6px;padding:6px 8px;font-size:14px;text-align:center;outline:none;margin-bottom:8px;"
-    onkeydown="if(event.key==='Enter')saveBurnPopup();if(event.key==='Escape')closeBurnPopup();"/>
-  <button onclick="saveBurnPopup()" style="width:100%;background:#639922;color:#fff;border:none;border-radius:6px;padding:7px;font-size:13px;font-weight:500;cursor:pointer;">保存</button>
+<div id="burn-popup" style="display:none;position:fixed;z-index:500;background:#fff;border:1px solid #e0dfd8;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.18);padding:14px;width:240px;box-sizing:border-box;" onclick="event.stopPropagation()">
+  <div style="font-size:12px;font-weight:500;color:#444;margin-bottom:8px;text-align:center;" id="burn-popup-title">运动消耗</div>
+  <div id="burn-popup-list" style="margin-bottom:8px;display:flex;flex-direction:column;gap:4px;"></div>
+  <div style="display:flex;gap:6px;align-items:center;">
+    <input id="burn-popup-input" type="number" min="0" placeholder="千卡"
+      style="flex:1;min-width:0;border:1px solid #e0dfd8;border-radius:6px;padding:6px 8px;font-size:14px;text-align:center;outline:none;box-sizing:border-box;"
+      onkeydown="if(event.key==='Enter')saveBurnPopup();if(event.key==='Escape')closeBurnPopup();"/>
+    <button onclick="saveBurnPopup()" style="background:#639922;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;flex-shrink:0;">添加</button>
+  </div>
 </div>
 
 </body>
